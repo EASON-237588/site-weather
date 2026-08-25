@@ -469,7 +469,7 @@ let timer=null, errTimer=null;
 const EMBEDDED_KEY="CWA-04063E2C-B6E0-410A-A694-7078E47B617E";
 
 /* === APP VERSION（bump.py 自動跳號，勿更動此行格式） === */
-const VER="1.8";
+const VER="1.9";
 const VER_NAME="小夜景";
 $("ver").textContent="("+VER_NAME+")版本編號:"+VER;
 
@@ -723,6 +723,20 @@ function beep(times){
     o.start(st); o.stop(st+0.34);
   }
 }
+
+/* ---------- 研判列版面 ----------
+   欄數必須隨視窗寬度重算：只在 render() 算一次的話，視窗尺寸一變
+   （例如載入後才最大化）就會沿用 CSS 預設的 6 欄，8 張卡擠成兩排，
+   連帶把逐時趨勢壓扁。 */
+let alertCount=0;
+function layoutAlerts(){
+  const al=$("alerts");
+  if(!alertCount) return;
+  al.style.gridTemplateColumns =
+    (window.innerWidth>900) ? ("repeat("+alertCount+",minmax(0,1fr))") : "";
+  al.className="alerts"+(alertCount>=8?" dense":"");
+}
+window.addEventListener("resize",layoutAlerts);
 
 /* ---------- 警報橫幕 ---------- */
 const MQ_SPEED=32;        // 跑馬燈速度（像素/秒）。數字越小跑越慢
@@ -1278,9 +1292,8 @@ function render(lat,lon,om,place,cwa,quake,ty){
   else if(dSum!==null&&dSum>=80) A.push(alertBox("當日累積","大雨等級",dayHead+"，加強排水、抽水機待命。","warn"));
   else A.push(alertBox("當日累積","正常",dayHead+"，未達大雨標準。","ok"));
   $("alerts").innerHTML=A.join("");
-  if(window.innerWidth>900) $("alerts").style.gridTemplateColumns="repeat("+A.length+",minmax(0,1fr))";
-  else $("alerts").style.gridTemplateColumns="";
-  $("alerts").className="alerts"+(A.length>=8?" dense":"");
+  alertCount=A.length;
+  layoutAlerts();
 
   const bnItems=AL.filter(function(x){ return x.lv==="bad"||x.lv==="warn"; }).slice();
   if(NC.lv==="bad") bnItems.unshift({t:"降雨快報",m:(NC.mins!==undefined?("約 "+NC.mins+" 分鐘後降雨"):"持續降雨"),
