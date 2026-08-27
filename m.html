@@ -271,6 +271,32 @@
   .tabs{display:none}
   /* 手機版不顯示 LOGO（橫向、直向皆同），空間留給監控內容 */
   .brand #logo,.brand #logoFb{display:none}
+  /* --- iOS 安全區域 ---
+     viewport-fit=cover 會讓畫面延伸到瀏海／動態島與圓角底下，
+     必須用 env(safe-area-inset-*) 把內容推回可視範圍，否則標題會被蓋住。
+     高度改用 dvh：iOS Safari 的 100% 算的是版面視窗，與實際可視高度不符，
+     會在畫面下方留一段空白。 */
+  html,body{height:100vh;height:100dvh}
+  body{padding:calc(.45rem + env(safe-area-inset-top))
+               calc(.45rem + env(safe-area-inset-right))
+               calc(.45rem + env(safe-area-inset-bottom))
+               calc(.45rem + env(safe-area-inset-left))}
+
+  /* --- 「目前位置」按鈕：手機上最常按的鈕，做成醒目的發光脈動 --- */
+  #geo{background:var(--accent);color:#06202b;border-color:var(--accent);
+       font-weight:800;position:relative;
+       animation:geoPulse 1.9s ease-out infinite}
+  @keyframes geoPulse{
+    0%  {box-shadow:0 0 0 0 rgba(76,201,240,.75), 0 0 .5rem rgba(76,201,240,.55)}
+    70% {box-shadow:0 0 0 .85rem rgba(76,201,240,0), 0 0 .9rem rgba(76,201,240,.85)}
+    100%{box-shadow:0 0 0 0 rgba(76,201,240,0), 0 0 .5rem rgba(76,201,240,.55)}
+  }
+  #geo:active{transform:scale(.95)}
+  /* 使用者若在系統設定關閉動畫效果，就只保留顏色與光暈，不跳動 */
+  @media (prefers-reduced-motion:reduce){
+    #geo{animation:none;box-shadow:0 0 .6rem rgba(76,201,240,.7)}
+  }
+
   /* 橫向時鐘數字縮為原本的 0.75 倍（18.4→13.8rem、11→8.25vw）
      直向本來就不顯示時鐘，不受影響 */
   .clock .t{font-size:min(13.8rem,8.25vw)}
