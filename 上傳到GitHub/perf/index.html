@@ -279,36 +279,6 @@ img,svg{max-width:100%}
   .toolbar,.row{width:100%}
   .btn{padding:9px 16px;font-size:14px}
 
-  /* 堆疊式表格 */
-  table.data.stack{display:block}
-  table.data.stack thead{display:none}
-  table.data.stack tbody{display:block}
-  table.data.stack tr{
-    display:block;margin:0 0 10px;background:#fff;
-    border:1px solid var(--line);border-radius:6px;overflow:hidden;
-  }
-  table.data.stack tr:nth-child(even){background:#fff}
-  table.data.stack td{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-    border:0;border-bottom:1px dashed #e6ebf2;padding:7px 10px;text-align:right;
-  }
-  table.data.stack td:last-child{border-bottom:0}
-  table.data.stack td::before{
-    content:attr(data-l);flex:0 0 38%;text-align:left;
-    font-size:12.5px;font-weight:700;color:#5a6473;
-  }
-  table.data.stack td[data-l=""]::before{content:none}
-  table.data.stack td .hint{text-align:right}
-  table.data.stack td input,table.data.stack td .prog{width:100%!important;max-width:60%}
-  table.data.stack td.num{text-align:right}
-  /* 分組 / 小計 / 總計列 */
-  table.data.stack tr.grp{background:#e7edf5;border-radius:6px 6px 0 0;margin-bottom:0}
-  table.data.stack tr.grp td{justify-content:flex-start;text-align:left;border-bottom:0}
-  table.data.stack tr.grp td::before{content:none}
-  table.data.stack tr.sub td,table.data.stack tr.total td{padding:7px 10px}
-  table.data.stack tr.sub td[colspan]::before,table.data.stack tr.total td[colspan]::before{content:none}
-  table.data.stack td.seq{display:none}
-
   /* 基本資料雙欄表改為單欄 */
   table.info th,table.info td{display:block;width:auto!important}
   table.info th{background:var(--panel);border-bottom:0}
@@ -329,6 +299,27 @@ img,svg{max-width:100%}
   .wrap{margin-bottom:16px}
 }
 
+/* ---------- 手機直向：請橫放使用 ---------- */
+.rotate-tip{display:none}
+@media (max-width:640px) and (orientation:portrait){
+  .rotate-tip{
+    display:flex;position:fixed;inset:0;z-index:999;
+    flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:linear-gradient(160deg,#6b6fa8,#565a8e);color:#fff;text-align:center;padding:32px;
+  }
+  .rotate-tip .icon{font-size:56px;line-height:1;animation:rotate-hint 2.4s ease-in-out infinite}
+  .rotate-tip .t1{font-size:19px;font-weight:700;letter-spacing:2px}
+  .rotate-tip .t2{font-size:14px;opacity:.9;line-height:1.9}
+  .topbar,.mainnav,.wrap,.footer{display:none}
+}
+@keyframes rotate-hint{
+  0%,100%{transform:rotate(0deg)}
+  40%,70%{transform:rotate(90deg)}
+}
+@media (prefers-reduced-motion:reduce){
+  .rotate-tip .icon{animation:none}
+}
+
 /* ---------- 手機橫向（高度很小）：頁尾不固定 ---------- */
 @media (max-height:480px){
   .footer{position:static}
@@ -337,9 +328,15 @@ img,svg{max-width:100%}
 }
 
 </style>
-<!-- 單檔版 build: 2026-08-28 17:47 -->
+<!-- 單檔版 build: 2026-08-28 18:21 -->
 </head>
 <body>
+
+<div class="rotate-tip">
+  <div class="icon">📱</div>
+  <div class="t1">請將手機橫放</div>
+  <div class="t2">本系統採橫向表格檢視<br>螢幕轉為橫向後即可使用</div>
+</div>
 
 <header class="topbar">
   <div class="brand">
@@ -387,7 +384,7 @@ img,svg{max-width:100%}
    ============================================================ */
 const APP_VER   = 'v1.2';
 const BUILD_NAME = '小夜景';   // 版本代號（bump.py 自動維護）
-const BUILD_NO   = '005';      // 版本編號（bump.py 自動維護）
+const BUILD_NO   = '006';      // 版本編號（bump.py 自動維護）
 const DB_KEY  = 'perf_appraisal_db_v3';
 
 /* ============================================================
