@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>員工績效考核系統</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<style>
+:root{
+  --purple:#6b6fa8;
+  --purple-dk:#565a8e;
+  --blue:#3f7fbf;
+  --blue-lt:#eaf2fb;
+  --line:#c9d3e0;
+  --panel:#f5f7fa;
+  --head:#dce6f2;
+  --text:#333;
+  --muted:#7a869a;
+  --green:#3fb24a;
+  --yellow:#f2c200;
+  --red:#e04a3f;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; color:var(--text); background:#eef1f6;
+  font:14px/1.6 "Microsoft JhengHei","Segoe UI",Arial,sans-serif;
+}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:52px;padding:4px 18px;
+  background:linear-gradient(#7d81b8,var(--purple));
+  color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.logo-img{
+  height:68px;width:auto;display:block;
+  background:none;padding:0;border-radius:0;
+  filter:drop-shadow(0 0 2px rgba(255,255,255,.55)) drop-shadow(0 1px 2px rgba(0,0,0,.25));
+}
+.sys-name{font-size:17px;letter-spacing:2px}
+.topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.topbar-ctrl{display:flex;align-items:center;gap:10px}
+.login-user{font-size:13px;opacity:.95}
+.build-tag{
+  font-size:8px;line-height:1.2;padding:1px 6px;border-radius:8px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+  color:#fff;white-space:nowrap;letter-spacing:.3px;opacity:.9;
+}
+.role-switch{padding:3px 6px;border:0;border-radius:3px;font-family:inherit}
+
+/* ---------- nav ---------- */
+.mainnav{
+  display:flex;gap:2px;padding:0 14px;
+  background:var(--purple-dk);
+}
+.mainnav a{
+  color:#e8e9f5;padding:9px 18px;font-size:14px;text-decoration:none;
+  border-radius:4px 4px 0 0;
+}
+.mainnav a:hover{background:rgba(255,255,255,.15);text-decoration:none}
+.mainnav a.active{background:#eef1f6;color:var(--purple-dk);font-weight:700}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1180px;margin:16px auto 60px;padding:0 14px}
+.page-title{
+  font-size:16px;font-weight:700;color:var(--purple-dk);
+  border-left:5px solid var(--purple);padding-left:9px;margin:4px 0 14px;
+}
+.panel{
+  background:#fff;border:1px solid var(--line);border-radius:4px;
+  margin-bottom:16px;
+}
+.panel > h3{
+  margin:0;padding:8px 12px;font-size:14px;color:#42506b;
+  background:var(--panel);border-bottom:1px solid var(--line);border-radius:4px 4px 0 0;
+}
+.panel-body{padding:12px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:4px;padding:14px 16px;
+}
+.card .k{color:var(--muted);font-size:13px}
+.card .v{font-size:26px;font-weight:700;color:var(--purple-dk);line-height:1.3}
+.card .s{font-size:12px;color:var(--muted)}
+
+/* ---------- form ---------- */
+label.fld{display:flex;flex-direction:column;gap:3px;font-size:13px;color:#4a5568}
+input,select,textarea{
+  font:13px/1.5 inherit;padding:5px 7px;border:1px solid #b9c2cf;border-radius:3px;
+  background:#fff;color:var(--text);
+}
+input:focus,select:focus,textarea:focus{outline:2px solid #bcd3ee;border-color:var(--blue)}
+input[readonly]{background:#f2f4f7;color:#666}
+textarea{width:100%;min-height:88px;resize:vertical}
+.btn{
+  display:inline-block;padding:6px 16px;border:1px solid var(--purple);border-radius:3px;
+  background:var(--purple);color:#fff;cursor:pointer;font:13px/1.5 inherit;
+}
+.btn:hover{background:var(--purple-dk)}
+.btn.sec{background:#fff;color:var(--purple-dk)}
+.btn.sec:hover{background:#eceef8}
+.btn.sm{padding:2px 10px;font-size:12px}
+.btn.danger{background:#c9503f;border-color:#c9503f}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.spacer{flex:1}
+
+/* ---------- 基本資料 (雙欄式) ---------- */
+table.info{width:100%;border-collapse:collapse;background:#fff}
+table.info th,table.info td{
+  border:1px solid var(--line);padding:6px 10px;font-size:13px;font-weight:400;text-align:left;
+}
+table.info th{background:var(--panel);color:#42506b;width:14%;white-space:nowrap}
+table.info td{width:36%;color:#555}
+
+/* ---------- data table ---------- */
+table.data{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
+table.data th{
+  background:var(--head);color:#2f4260;border:1px solid var(--line);
+  padding:6px 8px;white-space:nowrap;
+}
+table.data td{border:1px solid var(--line);padding:5px 8px}
+table.data tbody tr:nth-child(even){background:#fafcfe}
+table.data tbody tr:hover{background:var(--blue-lt)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.center{text-align:center}
+.empty{padding:22px;text-align:center;color:var(--muted)}
+
+/* ---------- 分組 / 小計 / 總計列 ---------- */
+table.data tr.grp td{background:#e7edf5;color:#2f4260;font-size:13px}
+table.data tr.grp:hover td{background:#e7edf5}
+table.data tr.sub td{background:#f5f8fc;font-weight:700;color:#42506b}
+table.data tr.sub:hover td{background:#f5f8fc}
+table.data tr.total td{background:#dfe8f4;font-weight:700;color:#24364f;border-top:2px solid #9db4d0}
+table.data tr.total:hover td{background:#dfe8f4}
+table.data.score td{vertical-align:middle}
+
+.lock-tag{display:inline-block;padding:5px 14px;border:1px solid #d3b26a;border-radius:3px;
+  background:#fdf6e3;color:#8a6100;font-size:13px}
+.ro-text{min-height:32px;padding:6px 8px;background:#f7f9fc;border:1px solid #e3e8ef;border-radius:3px;
+  color:#4a5568;font-size:13px;white-space:pre-wrap}
+
+/* ---------- 完成進度 ---------- */
+.prog{position:relative;height:20px;background:#eef1f6;border:1px solid #dbe2ea;border-radius:10px;overflow:hidden;min-width:120px}
+.prog-bar{height:100%;border-radius:10px 0 0 10px;transition:width .3s}
+.prog-bar.full{background:linear-gradient(90deg,#7ed389,#3fb24a)}
+.prog-bar.part{background:linear-gradient(90deg,#9fc4e8,#3f7fbf)}
+.prog-bar.zero{background:transparent}
+.prog-txt{position:absolute;top:0;left:0;right:0;line-height:20px;text-align:center;
+  font-size:12px;font-weight:700;color:#33445c;font-variant-numeric:tabular-nums}
+td.done-n{color:#1d7a2b;font-weight:700}
+td.undone-n{color:#c9503f;font-weight:700}
+
+/* ---------- 共用版：同步狀態 / 唯讀提示 ---------- */
+.sync-chip{
+  font-size:11px;padding:2px 9px;border-radius:10px;white-space:nowrap;
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);color:#fff;
+}
+.sync-chip.ok{background:rgba(63,178,74,.85);border-color:rgba(255,255,255,.5)}
+.sync-chip.wait{background:rgba(242,194,0,.85);border-color:rgba(255,255,255,.5);color:#3a2f00}
+.sync-chip.bad{background:rgba(224,74,63,.9);border-color:rgba(255,255,255,.5)}
+.sync-chip.ro{background:rgba(255,255,255,.28)}
+.sync-chip.local{opacity:.7}
+.ro-banner{
+  margin:0;padding:9px 16px;background:#fdf6e3;border-bottom:1px solid #e6d9a8;
+  color:#8a6100;font-size:13px;text-align:center;
+}
+
+/* ---------- 考核確認區 ---------- */
+.confirm-panel > h3{background:#e8ecf7;color:#3c4478}
+.confirm-box{display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+.confirm-sum{min-width:230px}
+.confirm-sum .k{font-size:14px;color:#4a5568}
+.confirm-sum .v{font-size:34px;font-weight:700;color:var(--purple-dk);line-height:1.2}
+.confirm-sum .v .unit{font-size:15px;font-weight:400;color:var(--muted)}
+.confirm-sum .s{font-size:13px;color:#4a5568;margin-top:2px}
+.confirm-act{text-align:right;min-width:260px}
+.confirm-act .btn{margin-left:8px}
+.done-msg{color:#1d7a2b;font-weight:700;margin-bottom:8px}
+table.data td a b{color:var(--blue)}
+table.data td a:hover b{color:#1f5c96}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:-1px}
+.tabs button{
+  border:1px solid var(--line);border-bottom:0;background:var(--panel);
+  padding:5px 16px;border-radius:4px 4px 0 0;cursor:pointer;font:13px/1.5 inherit;color:#4a5568;
+}
+.tabs button.active{background:#fff;color:var(--purple-dk);font-weight:700}
+.tab-body{border:1px solid var(--line);padding:10px;background:#fff}
+
+/* ---------- 紅綠燈 ---------- */
+.light{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.2)}
+.light.g{background:radial-gradient(circle at 35% 30%,#8fe197,var(--green))}
+.light.y{background:radial-gradient(circle at 35% 30%,#ffe680,var(--yellow))}
+.light.r{background:radial-gradient(circle at 35% 30%,#ff9d94,var(--red))}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border:1px solid}
+.badge.draft{background:#f2f4f7;color:#5a6473;border-color:#c9d3e0}
+.badge.self{background:#fff6e0;color:#8a6100;border-color:#e6cf94}
+.badge.team{background:#e9f3ff;color:#245c96;border-color:#a9caea}
+.badge.mgr{background:#eae9fb;color:#4a44a0;border-color:#b7b4e6}
+.badge.done{background:#e6f6e8;color:#1d7a2b;border-color:#a3ddaa}
+
+/* ---------- 檔案 ---------- */
+.file-list{list-style:none;margin:6px 0 0;padding:0;font-size:13px}
+.file-list li{padding:3px 0;border-bottom:1px dashed #dde3ec;display:flex;gap:10px;align-items:center}
+.hint{font-size:12px;color:var(--muted)}
+
+/* ---------- footer / toast ---------- */
+.footer{
+  position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);
+  padding:6px 16px;font-size:12px;color:var(--muted);display:flex;gap:14px;align-items:center;
+}
+.toast{
+  position:fixed;left:50%;bottom:60px;transform:translateX(-50%) translateY(20px);
+  background:#333d51;color:#fff;padding:9px 20px;border-radius:4px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.25s;z-index:99;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- 列印 ---------- */
+@media print{
+  .topbar,.mainnav,.footer,.toolbar,.no-print{display:none!important}
+  body{background:#fff}
+  .wrap{max-width:none;margin:0}
+  .panel{border:0}
+  table.data th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* ============================================================
+   響應式：桌機橫向 / 手機橫向 / 手機直向
+   ============================================================ */
+html{ -webkit-text-size-adjust:100%; }
+img,svg{max-width:100%}
+
+/* 表格一律可在自己的容器內橫向捲動，不讓整頁橫捲 */
+.panel-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wrap{overflow-x:hidden}
+
+/* ---------- 平板 / 手機橫向（≤900px） ---------- */
+@media (max-width:900px){
+  .topbar{height:auto;padding:8px 12px;flex-wrap:wrap;gap:6px}
+  .logo-img{height:52px}
+  .sys-name{font-size:15px;letter-spacing:1px}
+  .login-user{font-size:12px}
+  .build-tag{font-size:8px;padding:0 6px}
+  .mainnav{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .mainnav a{padding:9px 14px;flex:0 0 auto}
+  .wrap{margin:10px auto 64px;padding:0 8px}
+  .panel-body{padding:10px 8px}
+  table.data{font-size:12.5px}
+  table.data th,table.data td{padding:5px 6px}
+  .confirm-act{text-align:left;min-width:0}
+  .confirm-act .btn{margin:6px 8px 0 0}
+}
+
+/* ---------- 手機直向（≤640px）：表格改為堆疊卡片 ---------- */
+@media (max-width:640px){
+  body{font-size:15px}
+  .wrap{padding:0 6px}
+  .page-title{font-size:15px}
+  .toolbar{gap:6px}
+  label.fld{flex:1 1 45%;min-width:130px}
+  label.fld select,label.fld input{width:100%}
+  .toolbar .btn{flex:1 1 auto}
+  .spacer{display:none}
+  .grid-cards{grid-template-columns:1fr}
+
+  /* 輸入元件放大，避免 iOS 自動縮放；並蓋掉行內固定寬度 */
+  input,select,textarea{font-size:16px;padding:7px 8px}
+  .toolbar input,.toolbar select,.row input,.row select,.panel-body > .row input{
+    width:100%!important;max-width:100%!important;
+  }
+  .toolbar,.row{width:100%}
+  .btn{padding:9px 16px;font-size:14px}
+
+  /* 堆疊式表格 */
+  table.data.stack{display:block}
+  table.data.stack thead{display:none}
+  table.data.stack tbody{display:block}
+  table.data.stack tr{
+    display:block;margin:0 0 10px;background:#fff;
+    border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  }
+  table.data.stack tr:nth-child(even){background:#fff}
+  table.data.stack td{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    border:0;border-bottom:1px dashed #e6ebf2;padding:7px 10px;text-align:right;
+  }
+  table.data.stack td:last-child{border-bottom:0}
+  table.data.stack td::before{
+    content:attr(data-l);flex:0 0 38%;text-align:left;
+    font-size:12.5px;font-weight:700;color:#5a6473;
+  }
+  table.data.stack td[data-l=""]::before{content:none}
+  table.data.stack td .hint{text-align:right}
+  table.data.stack td input,table.data.stack td .prog{width:100%!important;max-width:60%}
+  table.data.stack td.num{text-align:right}
+  /* 分組 / 小計 / 總計列 */
+  table.data.stack tr.grp{background:#e7edf5;border-radius:6px 6px 0 0;margin-bottom:0}
+  table.data.stack tr.grp td{justify-content:flex-start;text-align:left;border-bottom:0}
+  table.data.stack tr.grp td::before{content:none}
+  table.data.stack tr.sub td,table.data.stack tr.total td{padding:7px 10px}
+  table.data.stack tr.sub td[colspan]::before,table.data.stack tr.total td[colspan]::before{content:none}
+  table.data.stack td.seq{display:none}
+
+  /* 基本資料雙欄表改為單欄 */
+  table.info th,table.info td{display:block;width:auto!important}
+  table.info th{background:var(--panel);border-bottom:0}
+  table.info td{border-top:0}
+
+  /* 頁籤 */
+  .tabs{overflow-x:auto;white-space:nowrap}
+  .tabs button{flex:0 0 auto}
+
+  /* 確認區 */
+  .confirm-box{flex-direction:column;align-items:stretch}
+  .confirm-sum .v{font-size:28px}
+  .confirm-act{text-align:left}
+  .confirm-act .btn{width:100%;margin:6px 0 0}
+
+  /* 頁尾改為隨頁面捲動，讓小螢幕多出空間 */
+  .footer{position:static;flex-wrap:wrap;gap:8px}
+  .wrap{margin-bottom:16px}
+}
+
+/* ---------- 手機橫向（高度很小）：頁尾不固定 ---------- */
+@media (max-height:480px){
+  .footer{position:static}
+  .wrap{margin-bottom:16px}
+  .topbar{min-height:44px;padding:2px 12px}
+}
+
+</style>
+<!-- 單檔版 build: 2026-08-28 17:47 -->
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img id="logoImg" class="logo-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGsAAABYCAYAAADyUQkPAAAlpUlEQVR42u19eZgU1bn++51zqrp79oVFkWgQBCXEbQREIg0CQoy79hhABUW5Sq5Bo8abq7lNq1nUH+7GyFUTNWicdo3GgLjQxIhGRwk4GBREQBj2WZilu6rO+X5/dBWWcwGRIAiknqefbujumup66/u+97zfUsB+tjGgAOAzlP9kNSrm+v9Hofdl+N/fpE1gP90MqAjgzgCwCuXdN6Bi+jp06k2AJoAZUN800MR+ZlWizv/NAjAAaQCQMCoKulTAzK9H+e316NqFAM8HTf4brD2wEWD6Ac7n4HFgOdwIdj0gVgpxlQXvnU2o/NEqHFhAgGaAar4BoO0XYL3ux6nVKL9sFcrH+j9cdABSGh80Bh8cA+5VyL63BmXnE8DVedAE78Fztl+AVfx57DlOQPT9HJ//Y3kEQDkAbwRrBdGnEPKxRlS8shHlgwkwBJjX91A8E/tBnAqf1FYCt++AuyQByCzYNIO1AA0HxBv1qHh2LcqOGubHs8Bi/w3WrotT/Alggt9rvsJvJkAQIJvBJgvmYtCZAuKtjai881N0OnAY4O3O36K+4edaJBKJ7bqbdDpt8gb0RWvymRzVo/xdgH4FbHqKQZJ27ooWANAE1gKIlgJTDMy4z1B+Sxsa7jkMcKjDMezLYBEAisfjokuXLuwDAAAmnU7v8E7i8Xj+92Qy5vMTTccC3GlbceorHqQ0AG8C6yKgkwvcbKH0QUJTLrhA9lWwCICIx+OUyWQ8AJwJnWQAOP7443sVRiLdiUgKKS0AUNJn0EpBAlBa/+PZWbPq8xhlvDAiU+NxdenchW2Syd2FB00ApJMHZoOB4H3ZDQr/fGoAOpPJoFevXpGCgoLDhODjLan6SWV93xJC2pFIz4KCAhhjoLWGEBIkCEIIEOWfWclPzjnzjHVEgqQQGQixKSLli+1af5JKp9uvQDEZCIFkUuDGe2hXXfsEEO/m86f2AJkxAFBZWVncqaysCkKcJpU8QxL1LIgVQEkJbUyjknINgaY62VwjAwssx5mfi0YNSoDyLbssB4CY53lKKVVCwCgAlUaISyNCdBk3blzdJ6+9EyluaXGRSpkoSrJZWBLfUO3vmwAW+UBpAOjWrVsfpdR5lhDjSMresWgUQgpIIT7QrjcLgl+t7CTf+NOf3ti8g/tvCr1eFLwYnxwfjXzUdlxjcUHLa/37xquO+c7q5b994pAea9cvx24gA3sjWAp5eqs7dep0rCXFlYLodFupUsuyQESbmeglCDx1yKE9n02n0zoMcjwely0tLXTooYeaEOnY6pZMJmnOnDli6NCh+M6iRVydeiQL4I1focg+9qNlb7x05GHLPunWmT88uOuxpTW/KVM9hhn9b7C2uDwG4JVFo4dQLDpVEMZKZdkR2wYRNYDofaHU2IglTtnYqesL6XRax+NxFWKDHBCG2traL/2DqVSKAZhMJrNlIVyTSMjsU69CMtPcm2/7+HkUrFhfVOqJ+e8XL+h5cPeen60xyAER0JevlPdRsKTv8mRhYeEUVvJaS6kDbNuGUqqNiO6yLKtdKDW9pCRSpF0ceUxx8aMHxeMqAGdXbYl02tQHEY6ZWkXnaGlL+/KGsy5e2cvutNpVVgzMckPpwaqwuYW/6aFMfB1A2bbdNxaNzpZCTLOUOsBSCiTkW9qYI23bXiWIVn3wwQdrWdOPpJQrOri/rylyEhMb1hAKzBR1DIrb2rL5oMpEewHnELuaREgpzwXz36WUw6RSUEo5JOR/r1y5clBRQcFZAM794MMPHz7++ONjSlqjLJJ/8ddIZvet8IgNAA1BINKVzS0u7wUMUe0ioHyVB3cSMEUqpZWlIAV9IkFjV61a9XbvHj36E9FNJGVvAKSAY6WUZdHCotWh7++RLfd5XmuftiwRAquGiKZIKR1LKUlEr2jDQ1etXft23+7dK6xo9C8k5S/q6upWAmCp1AVCiH/OnDmzOZFIyL2VTu8tlhW2qCcBnCulbFVKFRJwf0ND4+Tgc6aw8FZFZB/BfOu5yaRYtGgRbVy/boAUYjUArFu3jv4NxddnWRQC62kACSJqV0oVkhB3N23ePLmqqsoCQL0PPfSkiG1PlEJcm160yEmlUmbVqlUFlpLHkBJ/AoAuXbrwfpZX221gUeh7fwRwFoB2KWVMAPe3tLRMAaBqa2tNHJBCyvuNMfUsxB98d4dYTB2upGJmUYf9p/6DA9D8IhzaHWAF0tEDABIA2okoRkQvtWWzkwHIqqoqAqBX9+x5UTQWO0wCty9YsKB15cqVNgBIkvFIJEpSyv3C/X0ERFahqFMAGuXPH3/VIhyxEzFOAzgfwCUAcgBiRLTcdd2Jwf5qa2u9rl27FgopbzDGZGWUawBQWVmZT89JggCV//4+6/aCMrZiVA4iWDMAoB6lPVaj4kIAVA3omnxRqdjVYAlf5zsKwO/81xYRtRtjRgFYA4AS/rEWFhYmopHIwUR4qbZ20QoAYuDAgS4ASKGOMswgy8oBQN++fXlfdHu+BcEBK4AK8yDKWBnokQ2o+OsmlJ1YnS8qNTtSCSy+YpyKAZjuW5gBIJj5pwAWB1aXzvtmqYguFkIYocTjvihLqVTK+HsbqLXOCSEafF1vH8MJ+AzFlatR1Dkv6xCzD5wB6SawtkCDDcTcdShPr0HZkUEl8PYqp8RXtKprAQzw3Z8N4BUA9/oyk+d/zvTs2fMoZVknaq03l5jyV31RdoukREJEiajNtu3W3b4gFoKSyaSCEGAhqaamRu7KOvqX8ucFgPWr/AMgsPQzzKB8+l9uBpsswIUQ5xLEOxtQcd9KVHQPV051BE18BULRE8B/+aAoAG1+3AoUdsTjcZEnEHROxLYhpZid+UemER0CqSBiQcSWZe1G98fE0hJksk4qlfKUaeOoaXSqq6t1BDneRSblnfJ5HKbtMT4BCAFQA1gbwC4ATY4A8+tRft1adC4KQAuTEPEV1lR3+G5Q+yf/TgDLA2vy9T3dq1evCAGngIiJxBsAUFVVJcLWQ0IwEUVd143kBfGvFzOjLAkQF+m1bbq0rGzqi89eMfunV148d+Kkg6Y98Jur1/bpFyXwTmmT5aEYtRoVV61G5XH5E7tjEpYIFeEwUFkK8WsF/d4GVEx4HVB+JbCsAaTYARXdABgM4DTfqmyfTPy/cAbYB5SRy3UnIY4EmKRl/uKzQ93xClRSFhhjKgFg6tSpXwuFT9fUCBCJUm/dxipma87kyZ0y1/7omgM3Nd/t9TvikKYe3Zs8KTLF6xramEjsAjf4M4CO/arkLSgq9QBuAHsMOqwA9LsjUDFvDSpGEKCrAa127Bjw3/5r7bvAuwE0hDLBqKqqUrW1tS5Z1gjbtgnAStfNE4iOMUkIYZRlwdGmCAAWLVq0S8GaE49LnjNHE5Feg5LNb59ZffoPH/n9Vav79z/BUgptbN7r94cnN/V+eVZxZ7jvnofSHtYu6Tug9RI7n8cMyrdzW+IZHQdg9npUPpsF3yq+JFYZAEcjX4hifKtqBPBgqEIJAFBUVMS+i+tlKUUgvDV//vz1fi0fd4hZRgoJtSUY75otkUjImpoaOSyT8YiIH77jjlGZn/6n9ckPRl7QRaoTKtqyKFqx4onGCy4c1O/lF//siNKyZDIpIruI4BBYabDYBbFPCEC2gU0rmGPAWRKYp74kVhkAl/nAZQFEATwMYH0oI4xwzR6ITgcBAsLZZoAlAgkBZt4lOaxkMin8JYBOp9O46667hpEQ/5VT6uSmfn1Q5GqsL4w+dtZNd1R2+ei9N8dcf70zSXaugPZ0KpUyl6H0m7oGEIR8JTABUm0HKA2gEsC5vmXY/vPDW+LT1oIcEQMEQfQ0AN6aSEsgTSAIKYt3EUgGAO65555BBFwDorMLCwqRJca3ly5ne8PaGy+9776p4xCb1iw7d4ZeR6QrNe89CzfJAKsvoeujfcAcH6x3AHwYrv8Lu8xDDz30OBLiECKAjdm0jYuABdHHUsk+5NHJAGZ+1RRJTU2NrKur4wCkadOmDVNK/ZiNOTVSUKCEEMi6zhoj5a+Pv/mOm4t1w9JkMin4xt8UkdaNeSWoYm9baW+TAQUnb4xvQUHx//P+a9Whxjy/vpLyW1KIqK8iWv/HEuLxIIrPk1KCiA78KsebTCYVAFRXV+tUKmVuueWWYbfeeutLDLxmWdaZ0VhMua67yfW829qMOe5Hl1xyF2uoZqtLLJVKGWZtgH0r+Ug+wzsQwPH+vyP+84shVrgVcUBokY9FniCrseP79X36EDIZgNklAER5vWzo0KEmk8lsz9WJVCrlpVIpDwBuvvnmUVLKq4hoVDQWgxACrus2aeZHiPn2yydPXg4AryeTCqm7IVx3rwZpW2AJnzgU+IpFZUix+CeApduLV/AAigoQ0dqI6y4PteQAABYvXpxnjEo15BwHIAwZPz5xQCqVWpNMJsUW7dBndgFpAGCuvfba4uLi4vMk0UQS4vhIJAIhJRzHaZJC/IGZb58yZconAUhDp07VINL1oWLrfQmsgP3FAfwNwA+CQk3/cx8DaAmvrYJtC4kgXZkv6aI2Lxpp6fjHAn2QiV52HMe1bKtUa1W0NSsKytOuueaanrFYbBwRXSiF6GlZFihvSess4A+WUr+ZMmXKUv/7CoAZmkppSqWY99Ka9i8DK1hTnQOgNN8zjd4d9K1Xt2tVAISUBxIRAOZIJLI9stVCRFnbtpWrzehEInH/prffVvfMnJnzj4OuvPLK4RHLGiukPEtKWaZU/lBd110spHzU87zHrrvuupUB4UgkEoaIPACYuo+BFAYr0O26A7gZQH8AhQCGdpBNFuyAOl7sl+WJhoYGua0YtGjRoiYAGdu2T3Vb23r6VqQvnzDhW7Kg4Fyp1DgpRJVl25BSwnVdw8x/k1I+2NTU9PS0adNaw6ywurpaA/tPdRMDeMhXJ1r8WBXpYHW8A7WTnp/OihQURCMAWgPrTCQStG7dOqqvr6d0Ou2OOe+8RUbrU4UQp0ycMOEtaVnnMdHJkUik0LIsgAiO49RLKWeD6OFUKpUJU3ffkvYLkMJgGeSzvycDeMoH53BfrTA+4fgYwJsdJaatOMK1voLemYgOicfjzYGyEbSbZjIZTBozptNm49nZXA5CyN62bf8xEo2ChIDjOC6IMlKpFxh46le//vXqkFWqVCql9xdL2pZlXeRbziAfoD4+SDnfwnL+wlh0SJsQALz//vsSABuNVcyAUirKjmNl5s3zRo4cWRiLcakx6ghb2INJiHiz5/WzLKuLMQZEgh3XbdVaL1OW9ayy7aen3X77go6sMJ1O64C6Yz8v8gwGeRyEfN6qqcPimDqoFl9wiUuWLPEAQFiinQjwPE/bdiR10pAh68noY7yc1VNZMmZHbOT7sgRc1/WUpVzLsmKe1u899NBD8bBHrampEfujq9sRsDb7gOQAXLmV9wmf17oVA+hs2/YR0Wi0wLZt2LY9PGrbfbTnVRgpwMxCSTHasi1YlgUpFQwbZLPZNcZwRgjxV0OUUeDzhBA3kNZ9Jo8ff4AXiWxcvHgxZzIZb391dV8GFgFI+eyvwrca9l1e4PYO8xfE8GNZIYAiMIPAEAQIISGFgDEMIiLXc9ukKzca5reU4kXSsmZ5jI+fe/rpDcEfHzNmTLGTy10XjcW6Zl13+MPTp88I3N6/t22DtQDAiQB+6S+Ky3zAAvdnATik45eZGdoY1sbUeZ67mQjtUsqjpZQVxvDMyi5dqzv2XgVg9O3bl1Op1Fvjzx+3jIgOI2N+CODxBID01/iDjQAlX00qPvm3grUGa6Y1VIa9pdbd+M+LAJwJ4BgAd/nvB/Mj1iFfLHMOgBMADDbGDIbnDRbaVNXXrzn20xUrTvh46dLhzLzBGAMCvrN5+fLCRCIh+/bta/vqBKXTae0DmF/fEf5sjCESYtjlEyZ0r06ndZD62NWbllIIY3RqWMorcNe22GYzExHn9pJFtAoRB+Fb0KfIp0EoRCjqAdzyBRnQ87DZ87A5m/1C8Y0xRmutIaXs0yxV55npdDMADut+yKfyGQA8g2cdx5kSjUYLPc+7FMD/hItwdlXBDHugRr2pPRupiN373Itj6l56/eSChf8Uv588/qDiC//D+/xn7B1dJMZfQ4lAiQhtMT9WKZ9ohB8iGOUDwBBRzZbaL2OGIpRCwRdnLmkA1KtXr79prRdyfpt48cUXF/sU/V+92mlqMimZSBR46xoJ4H9UV5e+m/rpteVZ9/G1Pxg54qNxZ5VlbbtnhXQc5HWyva7lxwBYEopVQc1g/5CAq0MPA4BbWlrIj2NNxhiAQEw8aHsnPZlMylQqZYioxhhDlmV1U0RnBO/tLEhz8t/lVCrlCXZa60afNfyux2e88PGZp05oOOxQe3MuW9floUff/N7ka1ZeduaZc5e3FhV87fVwuxgsCoHxji8VBbqh9IHb5haUmzmeN8tztas9DTY8smrSpKALn7YyDsEAIM38B8dxNnP+hF3OX3TBOwySX13Lw/zF8yN33DPqjav/Uyw97/RLy6U8tXjNepT/7a0/1Pc6bMCR6cefEi6V5Atmsrw3NdNRqM7iVABbK6fq/SWuiQHAtu0Vhk2j1hqC6MCChQv7+yxwq1acSCTEY489toKZZzIzCSEG/WjSpBNTqRTvCI1PJpPCT41wdXW1fuCBB6zbbr/93DvvvPPVtpg1c8Wx3yltdd21q6T4ef9p9z455PbbalPHHdfWIruWG8B0jKV7A3UPatUfBPAIgE0+O+wfusJHA/jtdgDjRCIh0+l0S9/DD3+dmasBWEx8NoA3v6zOgpjv8zzvbMuypKf1VQDm4kvKzsLJyWnTpsVc1z2/sbFxcmFR0dEF0Sg2trWuHfjH1zuVLFmSOvrD2vsvQtFdLbJrGXtrqJ4q9d7Ypho0HTwCYCDyeSsAqO0gLfUAUBTkm7a2swAQzfx3ZobrecyM0+P5gSR6G8MdNQD63WOPZTzPW2CMYRLitMsuu+yYdDptwtaVTCZF0EgQLAFuuummnjdOnfrz1tbWhQUFBdOLi4uPbmttrd/Y3JiUTc3HHPHC8073Dz90ampqpKZohLSriWivnd2kAQwDcCGAn4Rc4t+RrxkM6P2R/sK4LtyMgC9mgo1PMv7sefpWyjcf9CTjDAcwy7c8vQ2i4RFwD4CHBZHUnncz8tlqxONxNSdfYbvFZf3sZz8bSUQXObncORUVFbY2Bs3NzR9JKR/MZrO/S6VSGwDgPFFJAInq6mq9ChW8tysYpQD+17eY1tB7c0NU3vU/+wMfLLkNAmCSgEgr9YnW+h3LUgOYmTyPLwAwa1uucGoqpZFMiqVLl9ZwLpe0LOtgpdT3/2PixKEPPPTQnHyujHD11Vf3sKVMMNE5lmUNKCwsRHt7OxoaG2crpR7UWr94ww03tAXplKmAqU/dDbGPjG1QAH7sU3P466uAaKzwXeGAkPR0BvINCXo7deZiUSbjHH7YYQ+x4YGO45iIZZ0dHzjw25lMZvnWFrwEcGLRIgtAVkYivxREDxhjwES3XHbZZacpotHSsqrZmBPtwsISIkJbW9tG43lPkZQzbrrppr8inJisq2NKpbypAGEfK5iZHFIwLkS+lSeQmp7zwQrc3kAf2CXbUhmC2ORoXSNd9xcRQZUkZcxjvgTADfF4XGYymaCfSwal1+l0OriTwfQJF1xwuWXbRwEYYDxveaSoKBqJRNDW3o6mpqY3hJSPuK77/K233bbed7uUTqdFdXW1qa6u1rwP12AcEFroHgngpwB+5f/fXwDcGCIhFoBJyHdAbku/Y59QNH3niCN+C+DnjuOwpdTEEVVVtzW0tLQFnwtPQRtz9tmHy0hkADOPNWwOYmZiZs+2rGg2m30n5zgZkvLxe+6++/2Olbl+LNNfbytefhyXr2DnH3uwBiNoNPilz/xuADDfB+y0kBVd7IPZ7IO3NaJB8XhcrVix4j4iugJAqW3bB2QjkYm1b755uz9XsLytbfNQW0WOIuYzXOY+McuylGWhPdsOx3UapJDlIGLHcZb878MPXxsuV5s6dareXYlJQwIWu7DZBYHhQn2ZRvC1UfeWkHoRzFC6FMBCANOQb+4OKxwVAMb7r13/uePDzWQy3rJly9Zq5qnMgOM4xmjvhqHfG/y/thRvtjQ1rrClVWNHrOvtiN2P2ejNLS3z2trbf2JcbwBnc0ez0Y2O4xjLtsdccskl44JjTqVS3u6g38a3pEJuw6aycrw4+mQ8eeZpyAzqD7MHRngoAKcD+JO/hkJI7+viU3l06IJk5LPJq/zPMgCWUsK2bSOllNGoVWHbsYG2ZX1bu27EE4KIACFEuZDykiAXlsvl3nIc98OCWOxpR5vFLzz3/JLwwV04btylthTpXC6nhZQPTJgwYW4qlVrZsXr3a3F5AKLswBMK8447Dpn4QDQWF6Hq3QXo+9FSSGPgBqP+dyNYrwM4yXd/J22j/t10kKcORn641ucf8Md5WypfikhgEBGICK7nNQshSjzPcxzXFcJzf19UWv7ztWvXbqytrXU/T2aChg6Nyy5duvC6devo0Rkznrpg3Njp0Wh0EpgLlBB/vPr8808GkGNm3tXWxUQwRLCNCwGDZYd8C3OGDcLi3t9GjyUrcO4TL+Kwz5ajHTZyVgTCze3WQdZByuMdACN9tncsgGrks8WFPvsTodgWLJp1OPXPzI2e5y1zhNAkQAC9xqAPiRksxEtSiFssS413HceNRKOJpqaNM2pra+eMHj06Ulxc7PXt25eJUgbYQjqImWnChAlTcrncCKWsQyORyAkNxtw2LZWaXF9fb4WSo//SlotESboatvEQZRfryyrw1yH98e6x30WsrQ2nPf8K+r+7ELZ20YYoNpUWo3NLK/RuJp0qdNIZwNv+437/fRvAd/x81rHIKwzaB0z5C+RJ/uvPjDGfZLNZZLNZ5GtwPt969OhxnRAibtvWt6TnlSqp0sMGDTpu5syZyxOJhNyKW+Pq6mqZTqez48YlThFGzMtm24sty778oovG102fPv0+v45w58vTSCD5P0l1SCrlNqAAjcVl+HtVP7zd/0i0RqM45r0PMHTuO+jauBFZROCSQkNJEYQxsLQHb+tCzm4ZjB8wQhUa+ugAeN8v8LwXwEshEqIB9EK+NWgugE861BQG+1IA1LJly9Y6njfOGJZOnm100lI8F48fVZZOp3ViK0On0um0TiQScsaM9OKcm7tCSqEcJ+fY0rr3ogsvvCiVSnmTJk2ydqZj0iUpJXsmlUp56SFDyl894Xj8dsK5mDl0IMrXbcKEx55D4k8vo7KxCW0iBgJDC4nmogKUtbTAo90/z7LjWkn7bM6EXF6Q7hc+sQgPvY/4bauHhQDiEJhbGGI8HleLFy9+08nlrgLDzjlOloCjBUpeGj1gQEka0Ftu/NIBsHg8rp54omZGe3v7T4UUdjaXdUmI6RddcMGI6dOnu1v73tbsyJCAEYJSqZTpzA2bW0qKrUnXX/df86qqMi+OOIEol+MfPjWLLnn0WfT+dDlyZMMlBWKGBOOfh3RDl42NEMx7RMASOzBWwfixQSBfRn1DiBlqACXIN9kVbG+fmUzGSyQSsu6f/7wz5zg3AIi2ZbPtbHhQLmK/MnLQyC6ZTMbb2onPZDJeMhlXM5548rZse+7nQghLa0+A6KnxY8cOzr+fVFsnDYArLAmAS7jNlJmW7Gm/TPa6d0zi+EfGntanDPJXnM2Vf3/WX/nyR5+jgR/UAUzIkg1iBoNQyDks6dYVBe05lGXb4JIE7QG0vkoVUdCndS+AR0MLYu0nJu8KxT/aVjqkqqrKWlhX9wvHyd1IQKw9m80y0N/Yubkj4oO/l8lkvGAKKL6QVc7oSZMmWY//8Y83Z7O5GwSR0EaXkJJ/Pv/880d2dImJREJOjcelZBbdzboGEDD3mCP5wTN+cFWX1RvmL/9W97M3EpxNTc13nbCg7sST3641sayDVoox8hPEoIlQxFksPOggrC0txuH1q5ElK29Z2EMTvHbi8yW+yNszVAqgfMCuDBEX3lbiMJ1O66OP7JeM2JGpECIXte2IpZRLgs+b/drcZ/3OE9ExpeJLWd6YROL6SDR6s6e1UUq2a09Peuzxxx+fNKnKemB6rRdMzvy44IANmWMPf3POUX1jNmiIbdt2Npdtqvp4+fqh79c1fnfD8v4MdP1MdKqXbAicd/+aBIo5iyWdO2Nen5446+33IT0Dk5/ywzZADnhtDOhTgYYmAFiNisUAftkNmx5ZjfKHAXA3NExchYqTCbihGzYNWYXKwyX4Q7Mbxq4GcawJwBAAy0LZZg/AFAC3h9QQsa27ycXjcTV/wQepbM65DsyRnOMg5zhkDD0z4qRhd8EHyk8+UlgoTiaT6ol0+hft2ez1UgihtS5USs24YOzYS6dPr3WrEwkxfvz44ZPGj3/ojrNHFLzz3SNOKyYaUd602e62bMULy8sLjrp09svTu25oLEwkEnJFpEuhMIaDVZsmQjHnsLSyE944vCfOfPt92K6GYbFHFWKxcyOKtpCLhF8AGpxQF8BVvkzlhdT8/7OPID79Y+HCW3Nurlprr14bo3K5nEPAj0/etDEzfPiQ/r5lhesxeNGiRTx69OjIk+n0L522tnM91/vIdV3NzNPHVFf/zlbqPUl4haKRixuikRg3N6+uB18x8YXMjKufe/71138xbfl6Ki1ySHE6ndZ2LrflQveEQCnnsLhzJzw94Lv4/nt1iLoenD0Up3bF9Oly5MfX1SI/0LghZEmeL1NN90mH2dZI8oB0zJ+/MJ11vO+5jvuCYbbb2tvhed5gMuKvo0YOnzpixIjSsDtMp9N6Zr6lFVlue9tx3beNMXBdN6eUmkDAke3t2damzc2zLpzzrrni2deSz937m3s7NTU2bKLS0mQyKSSzodCAG/YtqsK0Y8EBXZHu3w/V8/6BTq2tyJHaY3HqXwEroOY/BvBD///e9GWqVR3WYJcCmOcr+Nt0iwE1X7hw4SfvvPfe6bls7lLP89a7ngfP8yJgJCWb90cOHz559OjRETDTKaecMuz0U0/5nzNPP+1v0NZKQbjA8zxJRJFsNgs2Bgxm3Z57YNiSxa092jbz6CuuiDhk2ZJZd1yAb4jYUoFRxjk83e8IvNS3FyZm3sXBjY1o34OEYlfErMD9HeovislPpQzzY5gV6vI/0gfsgpBArDoQG5HJZLiqqsqqqqqyaufPf7A95/RwXe+/c46ztLW11fO07iEI92nXqRs9csSHZMxrgmQKzCcIKeG4Lnvarc052R9r4HuO4/xFGC7iwoJnHjh+YOH8rpV65j335ARrxxMiYKvGkEAymRT9cusbs7b0bv3eAL3wgE7ef2b+ritb23QrWZqYNedn/m15IPT8xZNDYVJlAAr3s2lfEuKO+9vRh9qJJobeyDffGV9+Ot2PVR/7FnYP8rWHwSK7q0/1T/UTm8s71CoahIpEiQicy3Vvdd037GhksFLqUGZ2fFW/J5SC6zqe53keEZlIlG8kaT31zHPPLQ0d6ylnn332KLtl84/e6d75tDe6Vf52SHRQiX7qlaJuTsunANgQigrYE6lUyjSNPnmsElG7x4ZNmPjG+5JBcMlCAfNWCXNwxW4AlxMMhaailTHY78WmogA4AlsAlebT7yzLQNLspttbtIVo+Wg/bt3kp1k+9ROVPwFwvZ/7CtSQauRH4d2M/Ez4zQBQUlLS07btIywhulmRyNlKymKX+QRFBGMYnueBiGwiQns2q5WUWcuyCm1bKWMMnKwzBMJpGTVq1HszZ858K1Din3nmmVkAZi0o6TZ9xlG9izcdUHnO7YOPHtKtufn+kRWlhZ1mv/G32k6dB5xx0snPLWF94ql1y1+8ZFEdraUCgMG0nYFtoaljjVlE3UDUYeA5A7PUv7LnBTqHgawHzGz/6m1uBr9odsM6K8gm/95PQAYDuIB8s90ryE+iqQfQD8DlPhmhUDM5ACyXUjZZlhW1lDrQtu1ipSQsy4JSFqQQsCwLANhSqtGyrFkkxDuK+QVVWJhTRH1JYJQQ4mgl1VApJZRS8Fy3kYFFIPEqgGYDzH7rW6UrB8z/RJdbllx88MHdytntXtLmDPZs1YeJzijw9BypzcXpP/951fanfOCbMdZ6J+5BUoZ87/GF2/ms4wMU6eD2HAARIkJwkpWUnlKKpJLrbMv6VEq1IWLbL0OIugLXnb9wxYqGbf2RkSNHFjqO09kmGgUhSkFsC5LdQNxbQLQKomYQ2kCYL5jKQTSSBQ0VoM/I8655/uWXn/SHgKmpmQzP+QrnZGhodrtvWRKA8VOSwv/RhgFKA6Laz1i8jp0bG0o7+Z3g+hsMYCyAI5Cvgircztpqa/IVSymFUoospUhJ+YgB7m9ubv47dmBq55fd0S4ej0ctosFCiLOlFCdZtnW45+l1Rpvb2l33Tl9TFP79InmvGBj/L9zlJ+x6vx2yokJ/jaX9pnIPn4/QPhf5UQ49w9PUlJRsWZaSUkIquUSS+FAp9bpQ1CiE9bJt2y1aa5JScjQa1bFYLCebmmK5wkIRi8WE1poA9FACJyiShZDiLEnoFSsoLGdjoI35kATuYFKPz549u3VHAd8XwArHsLA6v6Nb1M9M/9CXrbqH3aIlJZRlQSkJfy7hZiGkp5RiIQRLIXJKyo0kRGcppSWlsIiIlFLF0WgUQggYrcGMlUKIZwh4cu6bb74VWI8PktnbbrBGX+OabVvhWnSYqlaK/FzDkQAOF1IOUEJUSqWEylsZlFRbgJNSQor8sxACUgiAglu4Y6VS6l0i8TaEmFdSUvJmuDZxbwXp6wBrZ+/B1dENdQdQKm27hyXEDySREkqxlFJYkkhKBSEkCyE8klIoIbICeDZiWWs9IdZ99NFHG7bWGrQ3gxRs/x/ejcys+HmbswAAAABJRU5ErkJggg==" alt="崇偉企業2K7">
+    <span class="sys-name">員工績效考核系統</span>
+  </div>
+  <div class="topbar-right">
+    <span id="buildTag" class="build-tag"></span>
+    <div class="topbar-ctrl">
+      <span id="loginUser" class="login-user"></span>
+      <select id="roleSwitch" class="role-switch" title="切換身分（雛形用）">
+        <option value="admin">管理員</option>
+        <option value="manager">主管</option>
+      </select>
+      <select id="userSwitch" class="role-switch" title="切換使用者（雛形用）"></select>
+    </div>
+  </div>
+</header>
+
+<nav class="mainnav">
+  <a href="#/dashboard" data-nav="dashboard">首頁</a>
+  <a href="#/appraisal" data-nav="appraisal">考核作業</a>
+  <a href="#/report" data-nav="report">考核報表</a>
+  <a href="#/employee" data-nav="employee">員工資料</a>
+  <a href="#/period" data-nav="period">考核期間</a>
+  <a href="#/setting" data-nav="setting">系統設定</a>
+</nav>
+
+<main id="app" class="wrap"></main>
+
+<footer class="footer">
+  <span id="ver"></span> ｜ 資料儲存於本機瀏覽器 (localStorage)
+  <a href="#" id="btnExportAll">匯出備份</a>
+  <a href="#" id="btnImportAll">匯入備份</a>
+  <a href="#" id="btnResetAll">重設示範資料</a>
+  <input type="file" id="fileImport" accept=".json" hidden>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   員工績效考核系統 - 資料層 (localStorage)
+   v1.2  機電部專用：單一考核表範本、管理員 / 主管兩種身分
+   ============================================================ */
+const APP_VER   = 'v1.2';
+const BUILD_NAME = '小夜景';   // 版本代號（bump.py 自動維護）
+const BUILD_NO   = '005';      // 版本編號（bump.py 自動維護）
+const DB_KEY  = 'perf_appraisal_db_v3';
+
+/* ============================================================
+   考核表範本
+   ------------------------------------------------------------
+   scoreMode : 'avg' 各項平均（滿分 = scoreMax）
+               'sum' 各項加總（滿分 = 各項 max 合計）
+   raters    : 參與評分的角色，依序顯示欄位
+   ============================================================ */
+const DEFAULT_TEMPLATES = [
+  {
+    /* 來源：機電部人員績效表-空白(1).xlsx →「評效表」工作表 */
+    id:'T-MEP', name:'機電部人員評效表（月）', scoreMode:'sum', scoreMax:100,
+    raters:['manager'],
+    levels:[
+      { name:'優秀', min:8, max:10 }, { name:'良好', min:6, max:8 },
+      { name:'合格', min:4, max:6 },  { name:'較差', min:2, max:4 },
+      { name:'差',   min:0, max:2 }
+    ],
+    groups:[
+      { name:'基本要求', std:'10 分（主管評定）', items:[
+        { id:'B1', name:'出勤',     weight:10, max:10, desc:'此月為全勤，即無遲到、早退、曠工、請假等事項' },
+        { id:'B2', name:'規章制度', weight:10, max:10, desc:'遵守公司規章制度，月內無任何處罰違規紀錄' },
+        { id:'B3', name:'團隊活動', weight:10, max:10, desc:'積極配合並參與公司組織的各項團隊活動' }
+      ]},
+      { name:'綜合指標', std:'優秀 8~10｜良好 6~8｜合格 4~6｜較差 2~4｜差 0~2', items:[
+        { id:'C1', name:'責任感',   weight:10, max:10, desc:'責任心強，對自己工作負責，不抱怨' },
+        { id:'C2', name:'團隊合作', weight:10, max:10, desc:'團隊意識強，顧大局，積極配合相關部門工作' },
+        { id:'C3', name:'工作態度', weight:10, max:10, desc:'態度端正、認真，積極主動承擔工作任務並做好' },
+        { id:'C4', name:'工作能力', weight:10, max:10, desc:'按照要求完成工作任務，能獨立處理工作疑難問題' },
+        { id:'C5', name:'工作效率', weight:10, max:10, desc:'工作高效，不推延、無差錯、按時保質保量完成' },
+        { id:'C6', name:'自我學習', weight:10, max:10, desc:'聽從上級、同事正確建議並積極改進' },
+        { id:'C7', name:'人際溝通', weight:10, max:10, desc:'遇到問題主動與上級、同事溝通，協調解決' }
+      ]}
+    ]
+  }
+];
+
+/* ---- 預設設定（門檻一律以「百分比」表示，才能同時適用 10 分制與 100 分制）---- */
+const DEFAULT_SETTING = {
+  weights   : { manager:1 },        // 目前僅主管評定；日後加多方評分再於此調整
+  light     : { green:80, yellow:60 },              // 綠 ≥80%、黃 60~80%、紅 <60%
+  useItemWeight : false,   // true = 平均制改以指標權重加權
+  maxUploadMB   : 2,
+  allowExt      : ['doc','docx','ppt','pptx','xls','xlsx','pdf','jpg','png']
+};
+
+const DEPARTMENTS = ['機電部'];
+const TEAMS       = ['管理組','行政組','設計組','品管組','施工組','倉管組'];
+const TITLES      = ['協理','經理','副理','主任','機電主任','機電副主任','繪圖經理','繪圖主任','繪圖副主任',
+                     '工程師','繪圖工程師','品管工程師','內業工程師','領班','技術員','技工','半技工','助理'];
+/* ============================================================
+   權限名冊
+   ------------------------------------------------------------
+   ADMINS    : 管理員（可維護員工、期間、範本、系統設定）
+   REVIEWERS : 考核人員（可填主管評定的人）
+   ============================================================ */
+const ADMINS    = ['250743','231117'];   // 劉文椋、傅大洲
+const REVIEWERS = ['250743','260327'];   // 劉文椋、黃昇風
+
+const AWARD_TYPES = ['嘉獎','記功','記大功','獎金','申誡','記過'];
+const ATT_ITEMS   = ['加班','事假','病假','特休','曠職','遲到'];
+const STATUS_LIST = ['草稿','主管評分中','已完成'];
+const PERIOD_KIND = ['月度','季度','上半年','下半年','年度','試用期'];
+
+/* ============================================================
+   示範資料
+   ============================================================ */
+function seedDB(){
+  /* --- 機電部名冊：來源 機電部人員績效表-空白(1).xlsx →「機電組織」工作表 --- */
+  const mep = [
+    { empNo:'250743', name:'劉文椋', dept:'機電部', team:'管理組', title:'協理', hireDate:'2025-07-16', titleDate:'2025-07-16', manager:'', active:true },
+    { empNo:'231117', name:'傅大洲', dept:'機電部', team:'管理組', title:'副理', hireDate:'2023-11-20', titleDate:'2023-11-20', manager:'250743', active:true },
+    { empNo:'250853', name:'許民志', dept:'機電部', team:'管理組', title:'主任', hireDate:'2025-08-25', titleDate:'2025-08-25', manager:'250743', active:true },
+    { empNo:'251245', name:'林志峯', dept:'機電部', team:'管理組', title:'副理', hireDate:'2025-12-15', titleDate:'2025-12-15', manager:'250743', active:true },
+    { empNo:'240914', name:'劉嘉琪', dept:'機電部', team:'行政組', title:'助理', hireDate:'2024-09-03', titleDate:'2024-09-03', manager:'260327', active:true },
+    { empNo:'250731', name:'周紀岑', dept:'機電部', team:'行政組', title:'助理', hireDate:'2025-07-08', titleDate:'2025-07-08', manager:'260327', active:true },
+    { empNo:'250349', name:'林芝羽', dept:'機電部', team:'設計組', title:'繪圖工程師', hireDate:'2025-03-10', titleDate:'2025-03-10', manager:'260778', active:true },
+    { empNo:'260209', name:'王紫寧', dept:'機電部', team:'設計組', title:'繪圖副主任', hireDate:'2026-01-26', titleDate:'2026-01-26', manager:'260778', active:true },
+    { empNo:'260219', name:'邱銘宏', dept:'機電部', team:'設計組', title:'繪圖主任', hireDate:'2026-02-02', titleDate:'2026-02-02', manager:'260778', active:true },
+    { empNo:'260225', name:'鄭宜昇', dept:'機電部', team:'品管組', title:'機電主任', hireDate:'2026-02-23', titleDate:'2026-02-23', manager:'250743', active:true },
+    { empNo:'260778', name:'陳聰朗', dept:'機電部', team:'設計組', title:'繪圖經理', hireDate:'2026-07-27', titleDate:'2026-07-27', manager:'250743', active:true },
+    { empNo:'260327', name:'黃昇風', dept:'機電部', team:'管理組', title:'經理', hireDate:'2026-03-10', titleDate:'2026-03-10', manager:'250743', active:true },
+    { empNo:'250911', name:'簡孝鈞', dept:'機電部', team:'施工組', title:'工程師', hireDate:'2025-09-01', titleDate:'2025-09-01', manager:'231117', active:true },
+    { empNo:'251015', name:'洪偉育', dept:'機電部', team:'施工組', title:'工程師', hireDate:'2025-10-13', titleDate:'2025-10-13', manager:'231117', active:true },
+    { empNo:'251007', name:'張嘉峰', dept:'機電部', team:'施工組', title:'技術員', hireDate:'2025-10-01', titleDate:'2025-10-01', manager:'231117', active:true },
+    { empNo:'260317', name:'陳昱甫', dept:'機電部', team:'施工組', title:'技術員', hireDate:'2026-03-02', titleDate:'2026-03-02', manager:'231117', active:true },
+    { empNo:'250957', name:'林彥廷', dept:'機電部', team:'倉管組', title:'工程師', hireDate:'2025-09-23', titleDate:'2025-09-23', manager:'250853', active:true },
+    { empNo:'260334', name:'胡正偉', dept:'機電部', team:'倉管組', title:'工程師', hireDate:'2026-03-16', titleDate:'2026-03-16', manager:'250853', active:true },
+    { empNo:'260335', name:'李承風', dept:'機電部', team:'施工組', title:'領班', hireDate:'2026-03-16', titleDate:'2026-03-16', manager:'231117', active:true },
+    { empNo:'251030', name:'詹馥鴻', dept:'機電部', team:'施工組', title:'技術員', hireDate:'2025-10-20', titleDate:'2025-10-20', manager:'231117', active:true },
+    { empNo:'260325', name:'劉歷嶸', dept:'機電部', team:'品管組', title:'品管工程師', hireDate:'2026-03-09', titleDate:'2026-03-09', manager:'260225', active:true },
+    { empNo:'250954', name:'張文瑞', dept:'機電部', team:'品管組', title:'工程師', hireDate:'2025-09-20', titleDate:'2025-09-20', manager:'260225', active:true },
+    { empNo:'251153', name:'曾筠驊', dept:'機電部', team:'行政組', title:'助理', hireDate:'2025-11-25', titleDate:'2025-11-25', manager:'260327', active:true },
+    { empNo:'260414', name:'洪友竣', dept:'機電部', team:'施工組', title:'領班', hireDate:'2026-04-07', titleDate:'2026-04-07', manager:'231117', active:true },
+    { empNo:'260435', name:'李東榮', dept:'機電部', team:'施工組', title:'領班', hireDate:'2026-04-20', titleDate:'2026-04-20', manager:'231117', active:true },
+    { empNo:'260442', name:'李秉睿', dept:'機電部', team:'施工組', title:'領班', hireDate:'2026-04-27', titleDate:'2026-04-27', manager:'231117', active:true },
+    { empNo:'260614', name:'王仁峻', dept:'機電部', team:'施工組', title:'工程師', hireDate:'2026-06-01', titleDate:'2026-06-01', manager:'231117', active:true },
+    { empNo:'251255', name:'王文女', dept:'機電部', team:'管理組', title:'內業工程師', hireDate:'2025-12-18', titleDate:'2025-12-18', manager:'260327', active:true },
+    { empNo:'260629', name:'洪偉勝', dept:'機電部', team:'管理組', title:'機電副主任', hireDate:'2026-06-08', titleDate:'2026-06-08', manager:'250743', active:true },
+    { empNo:'260630', name:'紀國隆', dept:'機電部', team:'施工組', title:'技工', hireDate:'2026-06-08', titleDate:'2026-06-08', manager:'231117', active:true },
+    { empNo:'260661', name:'許立緯', dept:'機電部', team:'施工組', title:'技工', hireDate:'2026-06-24', titleDate:'2026-06-24', manager:'231117', active:true },
+    { empNo:'260713', name:'李柏賢', dept:'機電部', team:'施工組', title:'工程師', hireDate:'2026-07-01', titleDate:'2026-07-01', manager:'231117', active:true },
+    { empNo:'260744', name:'柯丞安', dept:'機電部', team:'施工組', title:'工程師', hireDate:'2026-07-13', titleDate:'2026-07-13', manager:'231117', active:true },
+    { empNo:'260762', name:'陳維',   dept:'機電部', team:'施工組', title:'半技工', hireDate:'2026-07-20', titleDate:'2026-07-20', manager:'231117', active:true },
+    { empNo:'260764', name:'池建瑋', dept:'機電部', team:'施工組', title:'半技工', hireDate:'2026-07-20', titleDate:'2026-07-20', manager:'231117', active:true },
+    { empNo:'260815', name:'花仲辰', dept:'機電部', team:'設計組', title:'繪圖工程師', hireDate:'2026-08-06', titleDate:'2026-08-06', manager:'260778', active:true },
+    { empNo:'260824', name:'李元君', dept:'機電部', team:'施工組', title:'技工', hireDate:'2026-08-10', titleDate:'2026-08-10', manager:'231117', active:true },
+    { empNo:'260866', name:'林姮瑜', dept:'機電部', team:'設計組', title:'繪圖工程師', hireDate:'2026-08-19', titleDate:'2026-08-19', manager:'260778', active:true }
+  ];
+
+  const employees = mep;
+
+
+  const periods = [
+    { id:'MEP-2026-07', templateId:'T-MEP', name:'機電部 2026 年 7 月評效', year:2026, kind:'月度', start:'2026-07-01', end:'2026-07-31', status:'關閉' },
+    { id:'MEP-2026-08', templateId:'T-MEP', name:'機電部 2026 年 8 月評效', year:2026, kind:'月度', start:'2026-08-01', end:'2026-08-31', status:'進行中' }
+  ];
+
+  const mkScores = function(tplId, map){
+    const o = {};
+    tplItems(tpl(tplId, DEFAULT_TEMPLATES)).forEach(function(i){
+      const v = map[i.id] || [null,null,null];
+      o[i.id] = { self:v[0], team:v[1], manager:v[2], note:'' };
+    });
+    return o;
+  };
+  const rnd = function(tplId, base, raters){
+    const j = function(){ return Math.min(10, Math.max(4, Math.round((base + (Math.random()*2-1))*2)/2)); };
+    const o = {};
+    tplItems(tpl(tplId, DEFAULT_TEMPLATES)).forEach(function(i){
+      o[i.id] = [ raters.indexOf('self')<0?null:j(), raters.indexOf('team')<0?null:j(), j() ];
+    });
+    return o;
+  };
+  const mepScore = function(base){ return mkScores('T-MEP', rnd('T-MEP', base, ['manager'])); };
+
+  const appraisals = [];
+
+  /* 機電部 7 月已結案（示範資料），8 月為進行中，可用「批次建立」產生全部 38 人 */
+  let seq = 0;
+  const julySample = [
+    ['250911', 9.0, '施工進度掌握佳，配合度高。'],
+    ['251015', 8.5, '現場問題回報即時。'],
+    ['250349', 8.0, '圖面產出穩定，可再加強細部標註。'],
+    ['251153', 7.5, '行政作業細心，需加強主動回報。'],
+    ['260630', 7.0, '出勤需再改善。']
+  ];
+  julySample.forEach(function(r){
+    seq++;
+    appraisals.push({
+      id:'A'+String(seq).padStart(4,'0'), periodId:'MEP-2026-07', templateId:'T-MEP',
+      empNo:r[0], reviewer:empNameIn(employees, reviewerOfIn(employees, r[0])),
+      goals:'', achievement:'', scores:mepScore(r[1]), attachments:[],
+      status:'已完成', comment:r[2], plan:'', updatedAt:'2026-08-03'
+    });
+  });
+  const augSample = ['250911','251015','250349'];
+  augSample.forEach(function(no){
+    seq++;
+    appraisals.push({
+      id:'A'+String(seq).padStart(4,'0'), periodId:'MEP-2026-08', templateId:'T-MEP',
+      empNo:no, reviewer:empNameIn(employees, reviewerOfIn(employees, no)),
+      goals:'', achievement:'', scores:mepScore(8), attachments:[],
+      status:'主管評分中', comment:'', plan:'', updatedAt:'2026-08-25'
+    });
+  });
+
+  const awards = [
+    { empNo:'250911', date:'2026-06-15', type:'嘉獎', reason:'搶修夜間停電事故' },
+    { empNo:'250349', date:'2026-05-08', type:'嘉獎', reason:'圖面產出效率提升' },
+    { empNo:'260630', date:'2026-07-05', type:'申誡', reason:'未依規定配戴防護具' }
+  ];
+  const attendance = [
+    { empNo:'250911', periodId:'MEP-2026-08', item:'加班', hours:36, days:4.5 },
+    { empNo:'251015', periodId:'MEP-2026-08', item:'加班', hours:28, days:3.5 },
+    { empNo:'250349', periodId:'MEP-2026-08', item:'事假', hours:8,  days:1 },
+    { empNo:'251153', periodId:'MEP-2026-08', item:'特休', hours:16, days:2 },
+    { empNo:'250911', periodId:'MEP-2026-07', item:'加班', hours:42, days:5.25 },
+    { empNo:'260630', periodId:'MEP-2026-07', item:'遲到', hours:1,  days:0 }
+  ];
+
+  return {
+    ver:APP_VER, employees:employees, periods:periods, appraisals:appraisals,
+    awards:awards, attendance:attendance,
+    templates:JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)),
+    setting:JSON.parse(JSON.stringify(DEFAULT_SETTING)),
+    seq:seq
+  };
+}
+function mgrOf(list, no){ const e = list.find(function(x){ return x.empNo===no; }); return e ? e.manager : ''; }
+
+/** 沿直屬主管往上找到第一位有考核權限的人；找不到則回傳第一位考核人員 */
+function reviewerOfIn(list, no){
+  let cur = no, guard = 0;
+  while(cur && guard++ < 20){
+    if(REVIEWERS.indexOf(cur) >= 0 && cur !== no) return cur;
+    const e = list.find(function(x){ return x.empNo===cur; });
+    if(!e) break;
+    if(REVIEWERS.indexOf(e.manager) >= 0) return e.manager;
+    cur = e.manager;
+  }
+  // 本人就是考核人員（如劉文椋）→ 由另一位考核人員評
+  const other = REVIEWERS.filter(function(r){ return r !== no; })[0];
+  return other || REVIEWERS[0];
+}
+function empNameIn(list, no){ const e = list.find(function(x){ return x.empNo===no; }); return e ? e.name : ''; }
+
+/* ============================================================
+   儲存 / 讀取
+   ============================================================ */
+let DB = null;
+
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(DB_KEY);
+    DB = raw ? JSON.parse(raw) : seedDB();
+  }catch(e){ DB = seedDB(); }
+  fixDB();
+  return DB;
+}
+function fixDB(){
+  DB.setting = Object.assign({}, DEFAULT_SETTING, DB.setting||{});
+  DB.setting.weights = Object.assign({}, DEFAULT_SETTING.weights, DB.setting.weights||{});
+  DB.setting.light   = Object.assign({}, DEFAULT_SETTING.light,   DB.setting.light||{});
+  DB.templates = (DB.templates && DB.templates.length) ? DB.templates : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+  ['employees','periods','appraisals','awards','attendance'].forEach(function(k){ DB[k] = DB[k] || []; });
+  // 期間 / 考核單補上範本
+  DB.periods.forEach(function(p){ if(!p.templateId) p.templateId = DB.templates[0].id; });
+  DB.appraisals.forEach(function(a){
+    if(!a.templateId){ const p = period(a.periodId); a.templateId = p ? p.templateId : DB.templates[0].id; }
+    if(!a.scores) a.scores = {};
+    tplItems(tpl(a.templateId)).forEach(function(i){
+      if(!a.scores[i.id]) a.scores[i.id] = { self:null, team:null, manager:null, note:'' };
+    });
+  });
+}
+function saveDB(){
+  try{
+    localStorage.setItem(DB_KEY, JSON.stringify(DB));
+    return true;
+  }catch(e){
+    alert('儲存失敗：瀏覽器儲存空間已滿。請先刪除部分附件，或匯出備份後重設資料。');
+    return false;
+  }
+}
+function resetDB(){ DB = seedDB(); saveDB(); }
+function nextId(prefix){ DB.seq = (DB.seq||0)+1; return prefix + String(DB.seq).padStart(4,'0'); }
+
+/* ============================================================
+   查詢
+   ============================================================ */
+function emp(no){ return DB.employees.find(function(e){ return e.empNo === no; }) || null; }
+function empName(no){ const e = emp(no); return e ? e.name : (no||''); }
+function period(id){ return DB.periods.find(function(p){ return p.id === id; }) || null; }
+function tpl(id, from){
+  const arr = from || DB.templates;
+  return arr.find(function(t){ return t.id === id; }) || arr[0];
+}
+function tplItems(t){
+  const arr = [];
+  (t.groups||[]).forEach(function(g){
+    (g.items||[]).forEach(function(i){ arr.push(Object.assign({ group:g.name, groupStd:g.std }, i)); });
+  });
+  return arr;
+}
+function apTpl(ap){ return tpl(ap.templateId); }
+/** 某員工的考核人員（工號） */
+function reviewerOf(no){ return reviewerOfIn(DB.employees, no); }
+function isAdminNo(no){ return ADMINS.indexOf(no) >= 0; }
+function isReviewerNo(no){ return REVIEWERS.indexOf(no) >= 0; }
+function hasVal(v){ return v !== null && v !== undefined && v !== '' && !isNaN(v); }
+
+/* ============================================================
+   計算
+   ============================================================ */
+/** 單項綜合分：依範本的評分者加權；缺分者不計，權重自動重分配 */
+function itemFinal(t, sc){
+  if(!sc) return null;
+  const w = DB.setting.weights;
+  let sum = 0, wsum = 0;
+  (t.raters||['manager']).forEach(function(r){
+    const v = sc[r];
+    if(hasVal(v)){ sum += Number(v)*(w[r]||0); wsum += (w[r]||0); }
+  });
+  if(wsum === 0){
+    // 單一評分者（如機電部評效表）不做加權，直接取分數
+    let only = null;
+    (t.raters||[]).forEach(function(r){ if(hasVal(sc[r])) only = Number(sc[r]); });
+    return only;
+  }
+  return Math.round((sum/wsum)*100)/100;
+}
+
+/** 範本滿分 */
+function maxTotalOf(t){
+  if(t.scoreMode === 'sum'){
+    return tplItems(t).reduce(function(s,i){ return s + (Number(i.max)||0); }, 0);
+  }
+  return Number(t.scoreMax) || 10;
+}
+
+/** 整份考核總分 */
+function totalScore(ap){
+  if(!ap) return null;
+  const t = apTpl(ap);
+  const items = tplItems(t);
+  if(t.scoreMode === 'sum'){
+    let sum = 0, n = 0;
+    items.forEach(function(i){
+      const f = itemFinal(t, ap.scores[i.id]);
+      if(f !== null){ sum += f; n++; }
+    });
+    return n ? Math.round(sum*100)/100 : null;
+  }
+  const useW = DB.setting.useItemWeight;
+  let sum = 0, wsum = 0;
+  items.forEach(function(i){
+    const f = itemFinal(t, ap.scores[i.id]);
+    if(f === null) return;
+    const w = useW ? (Number(i.weight)||0) : 1;
+    sum += f*w; wsum += w;
+  });
+  if(wsum === 0) return null;
+  return Math.round((sum/wsum)*100)/100;
+}
+
+/** 達成百分比（統一燈號與等第的基準） */
+function pctOf(ap){
+  const t = totalScore(ap);
+  if(t === null) return null;
+  const m = maxTotalOf(apTpl(ap));
+  return m ? Math.round(t/m*10000)/100 : null;
+}
+
+/** 各評分者的欄位平均 */
+function raterAvg(ap, role){
+  const t = apTpl(ap);
+  if((t.raters||[]).indexOf(role) < 0) return null;
+  let sum = 0, n = 0;
+  tplItems(t).forEach(function(i){
+    const v = ap.scores[i.id] ? ap.scores[i.id][role] : null;
+    if(hasVal(v)){ sum += Number(v); n++; }
+  });
+  return n ? Math.round((sum/n)*100)/100 : null;
+}
+/** 各評分者的欄位加總（加總制用） */
+function raterSum(ap, role){
+  const t = apTpl(ap);
+  if((t.raters||[]).indexOf(role) < 0) return null;
+  let sum = 0, n = 0;
+  tplItems(t).forEach(function(i){
+    const v = ap.scores[i.id] ? ap.scores[i.id][role] : null;
+    if(hasVal(v)){ sum += Number(v); n++; }
+  });
+  return n ? Math.round(sum*100)/100 : null;
+}
+/** 依範本回傳該評分者欄位的小計（加總制取和、平均制取平均） */
+function raterTotal(ap, role){
+  return apTpl(ap).scoreMode === 'sum' ? raterSum(ap, role) : raterAvg(ap, role);
+}
+
+/** 紅綠燈：一律以百分比判斷 */
+function lightOfPct(pct){
+  if(pct === null || pct === undefined) return { cls:'', text:'—' };
+  const L = DB.setting.light;
+  if(pct >= L.green)  return { cls:'g', text:'綠燈' };
+  if(pct >= L.yellow) return { cls:'y', text:'黃燈' };
+  return { cls:'r', text:'紅燈' };
+}
+/** 單項用：分數 / 滿分 換算百分比 */
+function lightOfScore(score, max){
+  if(score === null || score === undefined) return { cls:'', text:'—' };
+  return lightOfPct(Number(score)/(Number(max)||10)*100);
+}
+
+/** 等第（百分比） */
+function gradeOfPct(pct){
+  if(pct === null || pct === undefined) return '—';
+  if(pct >= 90) return 'S 卓越';
+  if(pct >= 80) return 'A 優良';
+  if(pct >= 70) return 'B 良好';
+  if(pct >= 60) return 'C 待改進';
+  return 'D 不合格';
+}
+/** 機電部評效表的五級距名稱（依單項分數） */
+function levelOf(t, score){
+  if(!t.levels || !t.levels.length || score === null || score === undefined) return '';
+  const s = Number(score);
+  for(let i=0;i<t.levels.length;i++){
+    const L = t.levels[i];
+    if(s >= L.min && (s <= L.max)) return L.name;
+  }
+  return '';
+}
+
+/* ============================================================
+   工具
+   ============================================================ */
+function fmt(v, d){ d = (d===undefined?2:d); return hasVal(v) ? Number(v).toFixed(d) : ''; }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+/** 西元 → 民國（顯示用） */
+function rocDate(iso){
+  if(!iso) return '';
+  const p = iso.split('-');
+  if(p.length !== 3) return iso;
+  return (Number(p[0])-1911) + '.' + p[1] + '.' + p[2];
+}
+/** 到職累積日：X年X個月X天（對應原表 G 欄公式） */
+function seniority(iso, base){
+  if(!iso) return '';
+  const s = new Date(iso), e = base ? new Date(base) : new Date();
+  if(isNaN(s.getTime()) || e < s) return '';
+  let y = e.getFullYear()-s.getFullYear();
+  let m = e.getMonth()-s.getMonth();
+  let d = e.getDate()-s.getDate();
+  if(d < 0){ m--; d += new Date(e.getFullYear(), e.getMonth(), 0).getDate(); }
+  if(m < 0){ y--; m += 12; }
+  return y + '年' + m + '個月' + d + '天';
+}
+
+</script>
+<script>
+/* ============================================================
+   員工績效考核系統 - 介面層  v1.1
+   ============================================================ */
+const $  = function(s, r){ return (r||document).querySelector(s); };
+const $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+function h(s){
+  return String(s===null||s===undefined?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function nl2br(s){ return h(s).replace(/\n/g,'<br>'); }
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+/* 目前身分（雛形：下拉切換，實務改接公司帳號 / AD）
+   管理員：ADMINS 名單（劉文椋、傅大洲）－ 可維護員工、期間、範本、設定
+   主管　：REVIEWERS 名單（劉文椋、黃昇風）－ 只能填自己負責的考核單 */
+let ROLE = localStorage.getItem('perf_role') || 'admin';
+let USER = localStorage.getItem('perf_user') || '';
+const ROLE_NAME  = { admin:'管理員', manager:'主管' };
+const RATER_NAME = { manager:'主管評定' };
+function roleUsers(role){ return (role === 'admin' ? ADMINS : REVIEWERS).slice(); }
+function fixUser(){
+  const list = roleUsers(ROLE);
+  if(list.indexOf(USER) < 0) USER = list[0];
+}
+function canEditCol(role){
+  if(ROLE === 'admin') return true;
+  return role === 'manager';
+}
+function isAdmin(){ return ROLE === 'admin'; }
+/** 劉文椋、黃昇風兩位主管都可考核全部人員；
+    但「已完成」的考核單即鎖定，主管不得再修改（僅管理員可調整） */
+function canEditAp(ap){
+  if(ROLE === 'admin') return true;
+  if(!isReviewerNo(USER)) return false;
+  return ap.status !== '已完成';
+}
+/** 表單是否處於鎖定狀態（已確認完成且非管理員） */
+function apLocked(ap){ return ap.status === '已完成' && !isAdmin(); }
+
+/* ============================================================
+   路由
+   ============================================================ */
+const ROUTES = {
+  dashboard : viewDashboard,
+  appraisal : viewAppraisalList,
+  form      : viewAppraisalForm,
+  report    : viewReport,
+  employee  : viewEmployee,
+  period    : viewPeriod,
+  setting   : viewSetting
+};
+function parseHash(){
+  const raw = (location.hash || '#/dashboard').replace(/^#\//,'');
+  const parts = raw.split('/');
+  return { name:parts[0] || 'dashboard', arg:decodeURIComponent(parts[1]||'') };
+}
+function route(){
+  const r = parseHash();
+  const fn = ROUTES[r.name] || viewDashboard;
+  $('#app').innerHTML = fn(r.arg) || '';
+  $$('.mainnav a').forEach(function(a){
+    const n = a.getAttribute('data-nav');
+    a.classList.toggle('active', n === r.name || (r.name==='form' && n==='appraisal'));
+  });
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   首頁
+   ============================================================ */
+let DASH = { year:'', month:'' };
+
+/** 期間的年、月（取自起始日） */
+function periodYM(p){
+  const d = String(p.start||'');
+  return { y: Number(d.slice(0,4)) || Number(p.year), m: Number(d.slice(5,7)) || 0 };
+}
+/** 依年月找出考核期間 */
+function periodByYM(y, m){
+  return DB.periods.filter(function(p){
+    const ym = periodYM(p);
+    return String(ym.y) === String(y) && String(ym.m) === String(m);
+  })[0] || null;
+}
+
+function viewDashboard(){
+  const open = DB.periods.filter(function(p){ return p.status === '進行中'; });
+  /* 年 / 月預設值：進行中的期間，其次最新的期間 */
+  if(!DASH.year){
+    const base = open[0] || DB.periods.slice().sort(function(a,b){
+      return String(b.start||'').localeCompare(String(a.start||''));
+    })[0];
+    if(base){ const ym = periodYM(base); DASH.year = ym.y; DASH.month = ym.m; }
+    else { const n = new Date(); DASH.year = n.getFullYear(); DASH.month = n.getMonth()+1; }
+  }
+  const total = DB.employees.filter(function(e){ return e.active; }).length;
+  const cards = open.map(function(p){
+    const done = DB.appraisals.filter(function(a){ return a.periodId === p.id && a.status === '已完成'; }).length;
+    const rate = total ? Math.round(done/total*1000)/10 : 0;
+    return card(h(p.name), rate+'%',
+      '已完成 '+done+' 人｜未完成 '+(total-done)+' 人（全部 '+total+' 人）');
+  }).join('') || '<div class="card"><div class="k">目前沒有進行中的考核期間</div></div>';
+
+  /* 各組別考核完成進度（以選定的年月計） */
+  const curP = periodByYM(DASH.year, DASH.month);
+  const teamStat = {};
+  DB.employees.filter(function(e){ return e.active; }).forEach(function(e){
+    const k = e.team || '未分組';
+    const t = teamStat[k] = teamStat[k] || { total:0, done:0 };
+    t.total++;
+    if(curP){
+      const ap = DB.appraisals.find(function(a){ return a.periodId===curP.id && a.empNo===e.empNo; });
+      if(ap && ap.status === '已完成') t.done++;
+    }
+  });
+  const teamKeys = TEAMS.filter(function(k){ return teamStat[k]; })
+    .concat(Object.keys(teamStat).filter(function(k){ return TEAMS.indexOf(k) < 0; }));
+  let sumT = 0, sumD = 0;
+  let progRows = teamKeys.map(function(k){
+    const t = teamStat[k];
+    const undone = t.total - t.done;
+    const rate = t.total ? Math.round(t.done/t.total*1000)/10 : 0;
+    sumT += t.total; sumD += t.done;
+    return '<tr><td data-l="組別">'+h(k)+'</td>'+
+      '<td class="center" data-l="人數">'+t.total+'</td>'+
+      '<td class="center done-n" data-l="已完成">'+t.done+'</td>'+
+      '<td class="center undone-n" data-l="未完成">'+undone+'</td>'+
+      '<td class="num" data-l="考核達成率">'+progBar(rate)+'</td></tr>';
+  }).join('');
+  if(!progRows) progRows = '<tr><td colspan="5" class="empty">尚無員工資料</td></tr>';
+  else {
+    const allRate = sumT ? Math.round(sumD/sumT*1000)/10 : 0;
+    progRows += '<tr class="total"><td data-l="組別">合計</td><td class="center" data-l="人數">'+sumT+'</td>'+
+      '<td class="center" data-l="已完成">'+sumD+'</td><td class="center" data-l="未完成">'+(sumT-sumD)+'</td>'+
+      '<td class="num" data-l="考核達成率">'+progBar(allRate)+'</td></tr>';
+  }
+
+  const todo = DB.appraisals.filter(function(a){ return a.status !== '已完成'; });
+
+  return ''+
+  '<div class="page-title">績效管理 － 評估 ‧ 改善 ‧ 發展</div>'+
+  '<div class="grid-cards" style="margin-bottom:16px">'+
+    card('在職員工', DB.employees.filter(function(e){return e.active;}).length + ' 人',
+         '機電部　共 '+TEAMS.length+' 組') + cards +
+  '</div>'+
+
+  '<div class="panel"><h3>我的待辦（'+h(empName(USER))+'　'+h(ROLE_NAME[ROLE])+'）</h3><div class="panel-body">'+
+    (todo.length ?
+      '<table class="data stack"><thead><tr><th>考核單號</th><th>考核期間</th><th>員工編號</th><th>姓名</th><th>組別</th><th>狀態</th><th class="center">操作</th></tr></thead><tbody>'+
+      todo.slice(0,20).map(function(a){
+        const e = emp(a.empNo) || {};
+        return '<tr><td data-l="單號">'+h(a.id)+'</td><td data-l="期間">'+h((period(a.periodId)||{}).name||'')+'</td>'+
+               '<td data-l="工號">'+h(a.empNo)+'</td><td data-l="姓名">'+h(e.name||'')+'</td>'+
+               '<td data-l="組別">'+h(e.team||'')+'</td>'+
+               '<td data-l="狀態">'+statusBadge(a.status)+'</td>'+
+               '<td class="center" data-l=""><a href="#/form/'+encodeURIComponent(a.id)+'">填寫</a></td></tr>';
+      }).join('')+'</tbody></table>'+
+      (todo.length>20?'<div class="hint" style="margin-top:6px">僅顯示前 20 筆，共 '+todo.length+' 筆</div>':'')
+      : '<div class="empty">目前沒有待處理的考核單</div>')+
+  '</div></div>'+
+
+  '<div class="panel"><h3>各組別考核完成進度</h3><div class="panel-body">'+
+    '<div class="toolbar">'+
+      '<label class="fld">年度<select onchange="DASH.year=Number(this.value);route()">'+
+        yearOptions().map(function(y){ return '<option'+(String(y)===String(DASH.year)?' selected':'')+'>'+y+'</option>'; }).join('')+
+      '</select></label>'+
+      '<label class="fld">月份<select onchange="DASH.month=Number(this.value);route()">'+
+        monthOptions().map(function(m){
+          const hasP = !!periodByYM(DASH.year, m);
+          return '<option value="'+m+'"'+(String(m)===String(DASH.month)?' selected':'')+'>'+
+                 m+' 月'+(hasP?'':'（無期間）')+'</option>';
+        }).join('')+
+      '</select></label>'+
+      '<span class="spacer"></span>'+
+      (curP? '<span class="hint">'+h(curP.name)+'　狀態：<b>'+h(curP.status)+'</b>　'+
+             h(curP.start)+' ~ '+h(curP.end)+'</span>'
+           : '<span class="hint" style="color:#c9503f">'+DASH.year+' 年 '+DASH.month+' 月尚未建立考核期間</span>')+
+    '</div>'+
+    '<table class="data stack"><thead><tr><th>組別</th><th class="center">人數</th>'+
+    '<th class="center">已完成</th><th class="center">未完成</th><th class="num">考核達成率</th></tr></thead>'+
+    '<tbody>'+progRows+'</tbody></table>'+
+  '</div></div>';
+}
+/** 年度選項：既有期間的年份 ＋ 今年、明年 */
+function yearOptions(){
+  const ys = DB.periods.map(function(p){ return periodYM(p).y; });
+  const now = new Date().getFullYear();
+  ys.push(now-2, now-1, now, now+1, Number(DASH.year));
+  return ys.filter(function(v,i,a){ return v && a.indexOf(v)===i; }).sort(function(a,b){ return b-a; });
+}
+function monthOptions(){
+  return [1,2,3,4,5,6,7,8,9,10,11,12];
+}
+function progBar(rate){
+  const cls = rate >= 100 ? 'full' : (rate > 0 ? 'part' : 'zero');
+  return '<div class="prog"><div class="prog-bar '+cls+'" style="width:'+Math.min(100,rate)+'%"></div>'+
+         '<span class="prog-txt">'+rate.toFixed(1)+'%</span></div>';
+}
+function card(k,v,s){
+  return '<div class="card"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="s">'+(s||'')+'</div></div>';
+}
+function statusBadge(st){
+  const m = { '草稿':'draft', '主管評分中':'mgr', '已完成':'done' };
+  return '<span class="badge '+(m[st]||'draft')+'">'+h(st)+'</span>';
+}
+
+/* ============================================================
+   考核作業 - 清單
+   ============================================================ */
+let AP_FILTER = { periodId:'', team:'', status:'', kw:'' };
+
+function viewAppraisalList(){
+  if(!AP_FILTER.periodId){
+    const open = DB.periods.filter(function(p){ return p.status==='進行中'; })[0];
+    AP_FILTER.periodId = open ? open.id : (DB.periods[0]||{}).id || '';
+  }
+  const p = period(AP_FILTER.periodId);
+  const t = p ? tpl(p.templateId) : DB.templates[0];
+
+  /* 組員名單：管理員看全部，主管只看自己負責的 */
+  const members = DB.employees.filter(function(e){
+    if(!e.active) return false;
+    if(AP_FILTER.team && e.team !== AP_FILTER.team) return false;
+    if(AP_FILTER.kw){
+      const k = AP_FILTER.kw.toLowerCase();
+      if((e.empNo+' '+e.name+' '+(e.title||'')).toLowerCase().indexOf(k) < 0) return false;
+    }
+    return true;
+  });
+
+  const rows = members.map(function(e){
+    const ap = apOf(AP_FILTER.periodId, e.empNo);
+    return { e:e, ap:ap, status: ap ? ap.status : '未建立' };
+  }).filter(function(r){
+    return !AP_FILTER.status || r.status === AP_FILTER.status;
+  });
+
+  const body = rows.length ? rows.map(function(r){
+    const e = r.e, ap = r.ap;
+    const s2 = ap ? totalScore(ap) : null;
+    const pc = ap ? pctOf(ap) : null;
+    const lg = lightOfPct(pc);
+    return '<tr>'+
+      '<td data-l="工號">'+h(e.empNo)+'</td>'+
+      '<td data-l="姓名"><a href="#" onclick="openEmp(\''+h(e.empNo)+'\');return false" title="點選姓名進入考核"><b>'+h(e.name)+'</b></a></td>'+
+      '<td data-l="組別">'+h(e.team||'')+'</td><td data-l="職稱">'+h(e.title||'')+'</td>'+
+      '<td data-l="考核人員">'+h(ap && ap.reviewer ? ap.reviewer : '—')+'</td>'+
+      '<td class="num" data-l="總分">'+(s2===null?'—':fmt(s2))+'</td>'+
+      '<td class="num" data-l="達成率">'+(pc===null?'—':pc.toFixed(1)+'%')+'</td>'+
+      '<td class="center" data-l="燈號">'+(pc===null?'':'<span class="light '+lg.cls+'"></span>')+'</td>'+
+      '<td class="center" data-l="等第">'+(pc===null?'—':h(gradeOfPct(pc)))+'</td>'+
+      (isAdmin()? '<td class="center" data-l="操作">'+(ap?'<a href="#" onclick="delAppraisal(\''+ap.id+'\');return false">刪除</a>':'')+'</td>' : '')+
+      '<td class="center" data-l="狀態">'+statusBadge(r.status)+'</td>'+
+    '</tr>';
+  }).join('') : '<tr><td colspan="'+(isAdmin()?10:9)+'" class="empty">查無組員</td></tr>';
+
+  const done = rows.filter(function(r){ return r.status === '已完成'; }).length;
+
+  return ''+
+  '<div class="page-title">考核作業</div>'+
+  '<div class="panel"><div class="panel-body">'+
+    '<div class="toolbar">'+
+      '<label class="fld">考核期間<select id="fPeriod">'+
+        DB.periods.map(function(x){ return '<option value="'+h(x.id)+'"'+(x.id===AP_FILTER.periodId?' selected':'')+'>'+h(x.name)+'</option>'; }).join('')+
+      '</select></label>'+
+      '<label class="fld">組別<select id="fTeam"><option value="">全部</option>'+
+        TEAMS.map(function(d){ return '<option'+(d===AP_FILTER.team?' selected':'')+'>'+h(d)+'</option>'; }).join('')+
+      '</select></label>'+
+      '<label class="fld">狀態<select id="fStatus"><option value="">全部</option>'+
+        ['未建立'].concat(STATUS_LIST).map(function(x){ return '<option'+(x===AP_FILTER.status?' selected':'')+'>'+h(x)+'</option>'; }).join('')+
+      '</select></label>'+
+      '<label class="fld">關鍵字<input id="fKw" value="'+h(AP_FILTER.kw)+'" placeholder="工號 / 姓名 / 職稱"></label>'+
+      '<button class="btn" onclick="applyApFilter()">查詢</button>'+
+      '<span class="spacer"></span>'+
+      (isAdmin()? '<button class="btn sec" onclick="batchCreate()">批次建立本期考核單</button>' : '')+
+    '</div>'+
+    '<div class="hint" style="margin-bottom:8px">'+
+      '點選<b>姓名</b>即可進入考核表填寫；尚未建立的考核單會在進入時自動建立。'+
+      '　本期使用：<b>'+h(t.name)+'</b>（滿分 '+maxTotalOf(t)+' 分）'+
+      (p && p.status!=='進行中' ? '　<b style="color:#c9503f">本期間狀態：'+h(p.status)+'</b>' : '')+
+    '</div>'+
+    '<table class="data stack"><thead><tr>'+
+      '<th>工號</th><th>姓名</th><th>組別</th><th>職稱</th><th>考核人員</th>'+
+      '<th class="num">總分</th><th class="num">達成率</th><th class="center">燈號</th><th class="center">等第</th>'+
+      (isAdmin()?'<th class="center">操作</th>':'')+
+      '<th class="center">狀態</th>'+
+    '</tr></thead><tbody>'+body+'</tbody></table>'+
+    '<div class="hint" style="margin-top:8px">組員 '+rows.length+' 人　已完成 '+done+' 人　未完成 '+(rows.length-done)+' 人</div>'+
+  '</div></div>';
+}
+
+/** 找出某期間某員工的考核單 */
+function apOf(periodId, empNo){
+  return DB.appraisals.find(function(a){ return a.periodId===periodId && a.empNo===empNo; }) || null;
+}
+
+/** 點姓名：有考核單就打開，沒有就先建立 */
+function openEmp(empNo){
+  const p = period(AP_FILTER.periodId);
+  if(!p){ toast('請先選擇考核期間'); return; }
+  let ap = apOf(p.id, empNo);
+  if(!ap){
+    if(ROLE !== 'admin' && !isReviewerNo(USER)){ toast('您沒有考核權限'); return; }
+    if(ROLE !== 'admin' && p.status !== '進行中'){ toast('本考核期間為「'+p.status+'」，無法新增考核單'); return; }
+    ap = { id:nextId('A'), periodId:p.id, templateId:p.templateId, empNo:empNo,
+           reviewer:(ROLE === 'manager' ? empName(USER) : ''), goals:'', achievement:'',
+           scores:blankScores(tpl(p.templateId)), attachments:[],
+           status:'主管評分中', comment:'', plan:'', updatedAt:todayStr() };
+    DB.appraisals.push(ap); saveDB();
+    toast('已建立 '+empName(empNo)+' 的考核單');
+  }
+  location.hash = '#/form/'+encodeURIComponent(ap.id);
+}
+
+function applyApFilter(){
+  AP_FILTER.periodId = $('#fPeriod').value;
+  AP_FILTER.team     = $('#fTeam').value;
+  AP_FILTER.status   = $('#fStatus').value;
+  AP_FILTER.kw       = $('#fKw').value.trim();
+  route();
+}
+function blankScores(t){
+  const o = {};
+  tplItems(t).forEach(function(i){ o[i.id] = { self:null, team:null, manager:null, note:'' }; });
+  return o;
+}
+function newAppraisal(){
+  const p = period(AP_FILTER.periodId) || DB.periods[0];
+  const e = DB.employees[0];
+  if(!p || !e){ toast('請先建立考核期間與員工資料'); return; }
+  const a = { id:nextId('A'), periodId:p.id, templateId:p.templateId, empNo:e.empNo, reviewer:'',
+              goals:'', achievement:'', scores:blankScores(tpl(p.templateId)), attachments:[],
+              status:'草稿', comment:'', plan:'', updatedAt:todayStr() };
+  DB.appraisals.push(a); saveDB();
+  location.hash = '#/form/'+encodeURIComponent(a.id);
+}
+function batchCreate(){
+  const p = period(AP_FILTER.periodId);
+  if(!p){ toast('請先選擇考核期間'); return; }
+  const t = tpl(p.templateId);
+  // 月度範本預設只建立該部門的人（依目前部門/組別篩選；未篩選則全部在職）
+  const targets = DB.employees.filter(function(e){
+    if(!e.active) return false;
+    if(AP_FILTER.team && e.team !== AP_FILTER.team) return false;
+    return true;
+  });
+  if(!confirm('將以範本「'+t.name+'」為 '+targets.length+' 位員工建立「'+p.name+'」考核單（已存在者略過），確定？')) return;
+  let n = 0;
+  targets.forEach(function(e){
+    if(DB.appraisals.some(function(a){ return a.periodId===p.id && a.empNo===e.empNo; })) return;
+    DB.appraisals.push({ id:nextId('A'), periodId:p.id, templateId:p.templateId, empNo:e.empNo,
+      reviewer:'', goals:'', achievement:'', scores:blankScores(t),
+      attachments:[], status:'主管評分中',
+      comment:'', plan:'', updatedAt:todayStr() });
+    n++;
+  });
+  saveDB(); route(); toast('已建立 '+n+' 份考核單');
+}
+function delAppraisal(id){
+  if(!confirm('確定刪除考核單 '+id+' ？此動作無法復原。')) return;
+  DB.appraisals = DB.appraisals.filter(function(a){ return a.id !== id; });
+  saveDB(); route(); toast('已刪除');
+}
+
+/* ============================================================
+   考核作業 - 表單
+   ============================================================ */
+let TAB = 'award';
+
+function viewAppraisalForm(id){
+  const a = DB.appraisals.find(function(x){ return x.id === id; });
+  if(!a) return '<div class="panel"><div class="empty">找不到考核單 '+h(id)+'　<a href="#/appraisal">回清單</a></div></div>';
+  const e = emp(a.empNo) || {};
+  const p = period(a.periodId) || {};
+  const t = apTpl(a);
+  const isSum = t.scoreMode === 'sum';
+  const hasLv = !!(t.levels && t.levels.length);
+  const raters = t.raters || ['manager'];
+  const colspan = 3 + raters.length + (hasLv?1:0) + 2;
+
+  /* --- 評分表 --- */
+  let rowsHtml = '';
+  (t.groups||[]).forEach(function(g, gi){
+    rowsHtml += '<tr class="grp"><td colspan="'+colspan+'"><b>'+h(g.name)+'</b>'+
+                (g.std?'　<span class="hint">評定標準：'+h(g.std)+'</span>':'')+'</td></tr>';
+    (g.items||[]).forEach(function(item, ii){
+      const sc = a.scores[item.id] || (a.scores[item.id] = { self:null, team:null, manager:null, note:'' });
+      const f  = itemFinal(t, sc);
+      const l  = lightOfScore(f, item.max);
+      rowsHtml += '<tr>'+
+        '<td class="center seq" data-l="序號">'+(ii+1)+'</td>'+
+        '<td data-l="項目"><b>'+h(item.name)+'</b><div class="hint">'+h(item.desc||'')+'</div></td>'+
+        '<td class="center" data-l="配分">'+(Number(item.max)||0)+' 分</td>'+
+        raters.map(function(r){ return scoreCell(a.id, item.id, r, item.max); }).join('')+
+        '<td class="num" data-l="得分" data-final="'+h(item.id)+'">'+(f===null?'—':fmt(f))+'</td>'+
+        (hasLv? '<td class="center" data-l="等級" data-level="'+h(item.id)+'">'+h(levelOf(t,f))+'</td>' : '')+
+        '<td class="center" data-l="紅綠燈" data-light="'+h(item.id)+'"><span class="light '+l.cls+'"></span></td>'+
+        '<td data-l="備註">'+(canEditAp(a)
+          ? '<input style="width:100%" value="'+h(sc.note||'')+'" oninput="setNote(\''+a.id+'\',\''+item.id+'\',this.value)" placeholder="評語 / 具體事例">'
+          : h(sc.note||''))+'</td>'+
+      '</tr>';
+    });
+    const gmax = (g.items||[]).reduce(function(s,i){ return s+(Number(i.max)||0); },0);
+    rowsHtml += '<tr class="sub"><td colspan="2" data-l="">'+h(g.name)+' 小計</td>'+
+      '<td class="center">'+gmax+' 分</td>'+
+      '<td class="num" colspan="'+raters.length+'"></td>'+
+      '<td class="num" data-gsum="'+gi+'">'+fmtOrDash(groupSum(a,t,g))+'</td>'+
+      (hasLv?'<td></td>':'')+'<td></td><td></td></tr>';
+  });
+
+  const total = totalScore(a), pc = pctOf(a), lg = lightOfPct(pc);
+  const totalRow = '<tr class="total">'+
+    '<td colspan="2">評定總分</td><td class="center">'+maxTotalOf(t)+' 分</td>'+
+    raters.map(function(r){
+      const v = raterTotal(a,r);
+      return '<td class="num" data-avg="'+r+'">'+(v===null?'—':fmt(v))+'</td>';
+    }).join('')+
+    '<td class="num" id="totalCell">'+(total===null?'—':fmt(total))+'</td>'+
+    (hasLv?'<td class="center" id="pctCell">'+(pc===null?'—':pc.toFixed(1)+'%')+'</td>':'')+
+    '<td class="center" id="totalLight"><span class="light '+lg.cls+'"></span></td>'+
+    '<td id="gradeCell">'+h(gradeOfPct(pc))+(hasLv?'':'　'+(pc===null?'':pc.toFixed(1)+'%'))+'</td></tr>';
+
+  const formula = isSum
+    ? '總分 ＝ 各項得分加總（滿分 '+maxTotalOf(t)+' 分）'
+    : '總分 ＝ 各項平均（滿分 '+maxTotalOf(t)+' 分）';
+
+  return ''+
+  '<div class="page-title">'+h(t.id==='T-MEP' ? '機電部人員評效表' : '績效管理 － 評估 ‧ 改善 ‧ 發展')+'</div>'+
+  '<div class="toolbar no-print">'+
+    '<a class="btn sec" href="#/appraisal">← 回清單</a>'+
+    '<span class="spacer"></span>'+
+    (isAdmin()?
+      '<label class="fld">狀態<select id="apStatus" onchange="setStatus(\''+a.id+'\',this.value)">'+
+        STATUS_LIST.map(function(s){ return '<option'+(s===a.status?' selected':'')+'>'+h(s)+'</option>'; }).join('')+
+      '</select></label>'
+      : '<span class="fld">狀態<span style="padding-top:4px">'+statusBadge(a.status)+'</span></span>')+
+    (apLocked(a) ? '<span class="lock-tag">🔒 已確認完成，不可修改</span>'
+                 : '<button class="btn" onclick="saveForm(\''+a.id+'\')">儲存</button>')+
+    '<button class="btn sec" onclick="window.print()">列印</button>'+
+  '</div>'+
+
+  '<div class="panel"><h3>基本資料</h3><div class="panel-body">'+
+    '<table class="info"><tbody>'+
+      '<tr><th>考核期間</th><td>'+h(p.id?(p.id+' － '+p.name):'')+'</td><th>考核表範本</th><td>'+h(t.name)+'</td></tr>'+
+      '<tr><th>員工編號</th><td>'+empSelect(a)+'</td><th>姓　　名</th><td>'+h(e.name||'')+'</td></tr>'+
+      '<tr><th>組　　別</th><td>'+h(e.team||'')+'</td><th>職　　稱</th><td>'+h(e.title||'')+'</td></tr>'+
+      '<tr><th>到職日期</th><td>'+h(e.hireDate||'')+(e.hireDate?'（民國 '+h(rocDate(e.hireDate))+'）':'')+'</td>'+
+          '<th>到職累積日</th><td>'+h(seniority(e.hireDate, p.end))+'</td></tr>'+
+      '<tr><th>考核人員</th><td>'+reviewerSelect(a)+'</td>'+
+          '<th>最後異動</th><td>'+h(a.updatedAt||'')+'</td></tr>'+
+    '</tbody></table>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>參考資訊</h3><div class="panel-body">'+
+    '<div class="tabs">'+tabBtn('award','獎懲記錄')+tabBtn('att','考勤記錄')+tabBtn('hist','考核歷史記錄')+'</div>'+
+    '<div class="tab-body" id="tabBody">'+refTab(a)+'</div>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>評分表　<span class="hint">'+h(formula)+'</span></h3><div class="panel-body">'+
+    '<table class="data score stack"><thead><tr>'+
+      '<th class="center" style="width:38px">序號</th><th style="width:26%">考評項目 / 內容</th><th class="center">配分</th>'+
+      raters.map(function(r){ return '<th class="num">'+RATER_NAME[r]+'</th>'; }).join('')+
+      '<th class="num">'+(isSum?'得分':'綜合')+'</th>'+
+      (hasLv?'<th class="center">等級</th>':'')+
+      '<th class="center">紅綠燈</th><th>備註</th>'+
+    '</tr></thead><tbody>'+rowsHtml+totalRow+'</tbody></table>'+
+    '<div class="hint" style="margin-top:6px">目前身分「'+h(empName(USER))+'　'+h(ROLE_NAME[ROLE])+'」'+
+      (isAdmin()?'可編輯全部欄位。':(apLocked(a)?'本張考核單已確認完成並鎖定，僅供檢視。':'可填寫全部人員的考核單。'))+
+      (hasLv?'　級距：'+t.levels.map(function(L){ return L.name+' '+L.min+'~'+L.max; }).join('｜'):'')+'</div>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>考核項目說明與附件</h3><div class="panel-body">'+
+    '<table class="info"><tbody>'+
+      '<tr><th style="width:16%">本期目標 / 工作重點</th><td colspan="3">'+
+        (canEditAp(a)? '<textarea id="fGoals" placeholder="例：完成營業額 98%&#10;其他相關事宜">'+h(a.goals||'')+'</textarea>'
+                     : '<div class="ro-text">'+nl2br(a.goals||'')+'</div>')+'</td></tr>'+
+      '<tr><th>具體達成說明</th><td colspan="3">'+
+        (canEditAp(a)? '<textarea id="fAch">'+h(a.achievement||'')+'</textarea>'
+                     : '<div class="ro-text">'+nl2br(a.achievement||'')+'</div>')+'</td></tr>'+
+      '<tr><th>附件</th><td colspan="3"><ul class="file-list" id="fileList">'+fileListHtml(a)+'</ul></td></tr>'+
+      (apLocked(a) ? '' :
+      '<tr><th>附件上傳</th><td colspan="3">'+
+        '<input type="file" id="fFile" multiple>'+
+        '<button class="btn sm sec" onclick="doUpload(\''+a.id+'\')">上傳</button>'+
+        '<div class="hint">支援類型（'+DB.setting.allowExt.join(', ')+'），單檔最大 '+
+          (DB.setting.maxUploadMB*1048576)+' bytes（'+DB.setting.maxUploadMB+' MB）</div></td></tr>')+
+    '</tbody></table>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>綜合評語與發展計畫</h3><div class="panel-body">'+
+    '<table class="info"><tbody>'+
+      '<tr><th style="width:16%">主管綜合評語</th><td colspan="3">'+
+        (canEditAp(a)? '<textarea id="fComment">'+h(a.comment||'')+'</textarea>'
+                     : '<div class="ro-text">'+nl2br(a.comment||'')+'</div>')+'</td></tr>'+
+      '<tr><th>改善 / 發展計畫</th><td colspan="3">'+
+        (canEditAp(a)? '<textarea id="fPlan">'+h(a.plan||'')+'</textarea>'
+                     : '<div class="ro-text">'+nl2br(a.plan||'')+'</div>')+'</td></tr>'+
+    '</tbody></table>'+
+    '<div class="toolbar no-print" style="margin-top:10px">'+
+      (apLocked(a) ? '' : '<button class="btn sec" onclick="saveForm(\''+a.id+'\')">暫存</button>')+
+      '<a class="btn sec" href="#/report">查看報表</a>'+
+    '</div>'+
+  '</div></div>'+
+
+  '<div class="panel confirm-panel"><h3>考核確認</h3><div class="panel-body">'+
+    '<div class="confirm-box">'+
+      '<div class="confirm-sum">'+
+        '<div class="k">'+h(empName(a.empNo))+'　'+h((emp(a.empNo)||{}).title||'')+'</div>'+
+        '<div class="v">'+(total===null?'—':fmt(total))+' <span class="unit">/ '+maxTotalOf(t)+' 分</span></div>'+
+        '<div class="s"><span class="light '+lg.cls+'"></span>　'+h(gradeOfPct(pc))+
+          (pc===null?'':'　達成 '+pc.toFixed(1)+'%')+'</div>'+
+      '</div>'+
+      '<div class="confirm-act no-print">'+
+        (a.status === '已完成'
+          ? '<div class="done-msg">✔ 本張考核單已完成確認</div>'+
+            (isAdmin()? '<div class="hint">管理員可用上方狀態下拉調整。</div>'
+                      : '<div class="hint">本張已鎖定，如需修改請洽管理員。</div>')
+          : (canEditAp(a)
+              ? '<div class="hint" style="margin-bottom:8px">確認後狀態將變更為「已完成」，並回到組員名單。</div>'+
+                '<button class="btn" onclick="confirmAp(\''+a.id+'\')">確認完成</button>'+
+                '<button class="btn sec" onclick="saveForm(\''+a.id+'\')">僅暫存</button>'
+              : '<div class="hint">目前身分無法確認本張考核單。</div>'))+
+      '</div>'+
+    '</div>'+
+  '</div></div>';
+}
+function fmtOrDash(v){ return v===null ? '—' : fmt(v); }
+function groupSum(a, t, g){
+  let sum = 0, n = 0;
+  (g.items||[]).forEach(function(i){
+    const f = itemFinal(t, a.scores[i.id]);
+    if(f !== null){ sum += f; n++; }
+  });
+  if(!n) return null;
+  return t.scoreMode === 'sum' ? Math.round(sum*100)/100 : Math.round(sum/n*100)/100;
+}
+function reviewerSelect(ap){
+  const cur = ap.reviewer || (ROLE === 'manager' ? empName(USER) : '');
+  if(!canEditAp(ap)) return h(cur || '—');
+  return '<select id="fReviewer">'+
+    '<option value=""'+(cur?'':' selected')+'>（未指定）</option>'+
+    REVIEWERS.map(function(no){
+      return '<option value="'+h(empName(no))+'"'+(empName(no)===cur?' selected':'')+'>'+h(empName(no))+'</option>';
+    }).join('')+'</select>';
+}
+function empSelect(a){
+  if(!isAdmin()) return h(a.empNo);
+  return '<select id="fEmpNo" onchange="changeEmp(\''+a.id+'\',this.value)">'+
+    DB.employees.map(function(e){
+      return '<option value="'+h(e.empNo)+'"'+(e.empNo===a.empNo?' selected':'')+'>'+h(e.empNo+' '+e.name)+'</option>';
+    }).join('')+'</select>';
+}
+function changeEmp(id, no){
+  const a = DB.appraisals.find(function(x){ return x.id===id; });
+  a.empNo = no; a.updatedAt = todayStr(); saveDB(); route();
+}
+function tabBtn(key,label){
+  return '<button class="'+(TAB===key?'active':'')+'" onclick="switchTab(\''+key+'\')">'+label+'</button>';
+}
+function switchTab(k){
+  TAB = k;
+  const a = DB.appraisals.find(function(x){ return x.id===parseHash().arg; });
+  $('#tabBody').innerHTML = refTab(a);
+  $$('.tabs button').forEach(function(b,i){ b.classList.toggle('active', ['award','att','hist'][i]===k); });
+}
+function refTab(a){
+  if(TAB === 'award'){
+    const rows = DB.awards.filter(function(x){ return x.empNo === a.empNo; });
+    return tbl(['日期','類別','事由'], rows.map(function(r){ return [r.date, r.type, r.reason]; }), '無獎懲記錄');
+  }
+  if(TAB === 'att'){
+    const rows = DB.attendance.filter(function(x){ return x.empNo===a.empNo && x.periodId===a.periodId; });
+    return tbl(['假別名稱','時數','工時天'], rows.map(function(r){ return [r.item, fmt(r.hours), fmt(r.days)]; }), '無考勤記錄');
+  }
+  const rows = DB.appraisals.filter(function(x){ return x.empNo===a.empNo && x.id!==a.id; })
+    .sort(function(x,y){ return String((period(y.periodId)||{}).start||'').localeCompare(String((period(x.periodId)||{}).start||'')); });
+  return tbl(['考核期間','總分','滿分','達成率','等第','狀態'], rows.map(function(r){
+    const s = totalScore(r), pc = pctOf(r);
+    return [(period(r.periodId)||{}).name||'', s===null?'—':fmt(s), maxTotalOf(apTpl(r)),
+            pc===null?'—':pc.toFixed(1)+'%', gradeOfPct(pc), r.status];
+  }), '無過往考核記錄');
+}
+function tbl(heads, rows, emptyMsg){
+  return '<table class="data"><thead><tr>'+heads.map(function(x){ return '<th>'+h(x)+'</th>'; }).join('')+'</tr></thead><tbody>'+
+    (rows.length ? rows.map(function(r){ return '<tr>'+r.map(function(c){ return '<td>'+h(c)+'</td>'; }).join('')+'</tr>'; }).join('')
+                 : '<tr><td colspan="'+heads.length+'" class="empty">'+h(emptyMsg)+'</td></tr>')+
+    '</tbody></table>';
+}
+
+function scoreCell(apId, itemId, role, max){
+  const a  = DB.appraisals.find(function(x){ return x.id===apId; });
+  const sc = a.scores[itemId];
+  const v  = (sc[role]===null||sc[role]===undefined) ? '' : sc[role];
+  if(!canEditCol(role) || !canEditAp(a)) return '<td class="num" data-l="'+RATER_NAME[role]+'">'+(v===''?'—':fmt(v))+'</td>';
+  return '<td class="num" data-l="'+RATER_NAME[role]+'"><input type="number" min="0" max="'+(max||10)+'" step="0.5" style="width:72px;text-align:right" '+
+         'value="'+h(v)+'" oninput="setScore(\''+apId+'\',\''+itemId+'\',\''+role+'\',this.value)"></td>';
+}
+function setScore(apId, itemId, role, val){
+  const a = DB.appraisals.find(function(x){ return x.id===apId; });
+  if(!canEditAp(a)){ toast('本張考核單不在您的權限範圍'); return; }
+  const t = apTpl(a);
+  const item = tplItems(t).find(function(i){ return i.id === itemId; }) || { max:10 };
+  let v = (val === '') ? null : Number(val);
+  if(v !== null){ if(isNaN(v)) v = null; else v = Math.min(Number(item.max)||10, Math.max(0, v)); }
+  a.scores[itemId][role] = v;
+  refreshCalc(a);
+}
+function setNote(apId, itemId, val){
+  DB.appraisals.find(function(x){ return x.id===apId; }).scores[itemId].note = val;
+}
+function refreshCalc(a){
+  const t = apTpl(a);
+  tplItems(t).forEach(function(item){
+    const f = itemFinal(t, a.scores[item.id]);
+    const c = $('[data-final="'+item.id+'"]'); if(c) c.textContent = (f===null?'—':fmt(f));
+    const lv= $('[data-level="'+item.id+'"]'); if(lv) lv.textContent = levelOf(t, f);
+    const g = $('[data-light="'+item.id+'"]');
+    if(g){ const l = lightOfScore(f, item.max); g.innerHTML = '<span class="light '+l.cls+'"></span>'; }
+  });
+  (t.groups||[]).forEach(function(g, gi){
+    const c = $('[data-gsum="'+gi+'"]'); if(c) c.textContent = fmtOrDash(groupSum(a,t,g));
+  });
+  (t.raters||[]).forEach(function(r){
+    const v = raterTotal(a,r); const c = $('[data-avg="'+r+'"]');
+    if(c) c.textContent = (v===null?'—':fmt(v));
+  });
+  const total = totalScore(a), pc = pctOf(a), lg = lightOfPct(pc);
+  if($('#totalCell'))  $('#totalCell').textContent = (total===null?'—':fmt(total));
+  if($('#pctCell'))    $('#pctCell').textContent  = (pc===null?'—':pc.toFixed(1)+'%');
+  if($('#totalLight')) $('#totalLight').innerHTML = '<span class="light '+lg.cls+'"></span>';
+  if($('#gradeCell'))  $('#gradeCell').textContent = gradeOfPct(pc) + ($('#pctCell')?'':'　'+(pc===null?'':pc.toFixed(1)+'%'));
+}
+/** 考核確認：檢查未填項目後結案 */
+function confirmAp(apId){
+  const a = DB.appraisals.find(function(x){ return x.id===apId; });
+  if(!canEditAp(a)){ toast('本張考核單不在您的權限範圍'); return; }
+  const t = apTpl(a);
+  const blanks = tplItems(t).filter(function(i){ return itemFinal(t, a.scores[i.id]) === null; });
+  if(blanks.length){
+    if(!confirm('尚有 '+blanks.length+' 個項目未評分（'+blanks.slice(0,3).map(function(i){return i.name;}).join('、')+
+                (blanks.length>3?' 等':'')+'）。\n仍要確認完成嗎？')) return;
+  }
+  saveFields(a);
+  if(!a.reviewer && ROLE === 'manager') a.reviewer = empName(USER);
+  a.status = '已完成';
+  a.updatedAt = todayStr();
+  if(saveDB()){
+    toast(empName(a.empNo)+' 的考核已確認完成');
+    location.hash = '#/appraisal';
+  }
+}
+function setStatus(apId, st){ DB.appraisals.find(function(x){ return x.id===apId; }).status = st; }
+function saveFields(a){
+  if($('#fReviewer')) a.reviewer   = $('#fReviewer').value.trim();
+  if($('#fGoals'))    a.goals      = $('#fGoals').value;
+  if($('#fAch'))      a.achievement= $('#fAch').value;
+  if($('#fComment'))  a.comment    = $('#fComment').value;
+  if($('#fPlan'))     a.plan       = $('#fPlan').value;
+  if($('#apStatus'))  a.status     = $('#apStatus').value;
+}
+function saveForm(apId){
+  const a = DB.appraisals.find(function(x){ return x.id===apId; });
+  if(!canEditAp(a)){ toast('本張考核單不在您的權限範圍'); return; }
+  saveFields(a);
+  a.updatedAt = todayStr();
+  if(saveDB()) toast('已暫存 '+apId);
+}
+
+/* ---- 附件 ---- */
+function fileListHtml(a){
+  if(!a.attachments.length) return '<li class="hint">尚無附件</li>';
+  return a.attachments.map(function(f,i){
+    const link = f.data ? '<a href="'+f.data+'" download="'+h(f.name)+'">'+h(f.name)+'</a>' : h(f.name);
+    return '<li>'+link+' <span class="hint">('+f.size+' bytes)</span>'+
+      (apLocked(a)?'':'<button class="btn sm danger no-print" onclick="delFile(\''+a.id+'\','+i+')">刪除</button>')+'</li>';
+  }).join('');
+}
+function doUpload(apId){
+  const a = DB.appraisals.find(function(x){ return x.id===apId; });
+  if(!canEditAp(a)){ toast('本張考核單已鎖定'); return; }
+  const input = $('#fFile');
+  const files = Array.prototype.slice.call(input.files||[]);
+  if(!files.length){ toast('請先選擇檔案'); return; }
+  const limit = DB.setting.maxUploadMB * 1048576;
+  let pending = files.length;
+  files.forEach(function(f){
+    const ext = (f.name.split('.').pop()||'').toLowerCase();
+    if(DB.setting.allowExt.indexOf(ext) < 0){ toast('不支援的檔案類型：'+f.name); pending--; return; }
+    if(f.size > limit){ toast('檔案超過上限：'+f.name); pending--; return; }
+    const r = new FileReader();
+    r.onload = function(){
+      a.attachments.push({ name:f.name, size:f.size, type:f.type, data:r.result, at:todayStr() });
+      pending--;
+      if(pending <= 0){
+        a.updatedAt = todayStr();
+        if(saveDB()){ $('#fileList').innerHTML = fileListHtml(a); input.value=''; toast('上傳完成'); }
+      }
+    };
+    r.readAsDataURL(f);
+  });
+}
+function delFile(apId, idx){
+  const a = DB.appraisals.find(function(x){ return x.id===apId; });
+  if(!canEditAp(a)){ toast('本張考核單已鎖定'); return; }
+  if(!confirm('確定刪除附件「'+a.attachments[idx].name+'」？')) return;
+  a.attachments.splice(idx,1); saveDB();
+  $('#fileList').innerHTML = fileListHtml(a);
+}
+
+/* ============================================================
+   考核報表
+   ============================================================ */
+let RP = { periodId:'', team:'', empNos:[] };
+
+function viewReport(){
+  if(!RP.periodId){
+    const open = DB.periods.filter(function(p){ return p.status==='進行中'; })[0];
+    RP.periodId = open ? open.id : (DB.periods[0]||{}).id || '';
+  }
+  const p = period(RP.periodId) || {};
+  const t = tpl(p.templateId);
+  const raters = t.raters || ['manager'];
+  const isSum = t.scoreMode === 'sum';
+
+  const list = DB.appraisals.filter(function(a){
+    if(a.periodId !== RP.periodId) return false;
+    const e = emp(a.empNo); if(!e) return false;
+    if(RP.team && e.team !== RP.team) return false;
+    return true;
+  });
+  if(!RP.empNos.length && list.length) RP.empNos = [list[0].empNo];
+  const picked = list.filter(function(a){ return RP.empNos.indexOf(a.empNo) >= 0; });
+
+  let rows = '';
+  picked.forEach(function(a){
+    tplItems(t).forEach(function(item){
+      const sc = a.scores[item.id] || {};
+      const f  = itemFinal(t, sc); const l = lightOfScore(f, item.max);
+      rows += '<tr>'+
+        '<td>'+h(a.empNo)+'</td><td>'+h(empName(a.empNo))+'</td>'+
+        '<td>'+h(item.group)+'</td><td>'+h(item.name)+'</td>'+
+        raters.map(function(r){ return '<td class="num">'+(hasVal(sc[r])?fmt(sc[r]):'')+'</td>'; }).join('')+
+        '<td class="num">'+(f===null?'':fmt(f))+'</td>'+
+        (t.levels && t.levels.length ? '<td class="center">'+h(levelOf(t,f))+'</td>' : '')+
+        '<td class="center"><span class="light '+l.cls+'"></span></td>'+
+      '</tr>';
+    });
+    const total = totalScore(a), pc = pctOf(a), lg = lightOfPct(pc);
+    rows += '<tr class="total">'+
+      '<td colspan="4">'+h(empName(a.empNo))+' '+(isSum?'評定總分':'總計')+'（'+h(gradeOfPct(pc))+'　'+(pc===null?'':pc.toFixed(1)+'%')+'）</td>'+
+      raters.map(function(r){
+        const v = raterTotal(a,r); return '<td class="num">'+(v===null?'':fmt(v))+'</td>';
+      }).join('')+
+      '<td class="num">'+(total===null?'':fmt(total))+' / '+maxTotalOf(t)+'</td>'+
+      (t.levels && t.levels.length ? '<td></td>' : '')+
+      '<td class="center"><span class="light '+lg.cls+'"></span></td></tr>';
+  });
+  if(!rows) rows = '<tr><td colspan="'+(6+raters.length)+'" class="empty">請於上方勾選受評人員</td></tr>';
+
+  const chooser = list.map(function(a){
+    const on = RP.empNos.indexOf(a.empNo) >= 0;
+    const e = emp(a.empNo) || {};
+    return '<label style="display:inline-block;margin:0 12px 4px 0;white-space:nowrap">'+
+      '<input type="checkbox" value="'+h(a.empNo)+'"'+(on?' checked':'')+' onchange="toggleEmp(this)"> '+
+      h(a.empNo+' '+e.name+(e.team?'（'+e.team+'）':''))+'</label>';
+  }).join('') || '<span class="hint">本期間無考核資料</span>';
+
+  /* 排名表 */
+  const ranked = list.map(function(a){ return { a:a, pc:pctOf(a) }; })
+    .filter(function(x){ return x.pc !== null; })
+    .sort(function(x,y){ return y.pc - x.pc; });
+  const rankRows = ranked.map(function(x,i){
+    const e = emp(x.a.empNo) || {};
+    const lg = lightOfPct(x.pc);
+    return '<tr><td class="center" data-l="名次">'+(i+1)+'</td><td data-l="工號">'+h(x.a.empNo)+'</td>'+
+      '<td data-l="姓名">'+h(e.name)+'</td>'+
+      '<td data-l="組別">'+h(e.team||'')+'</td><td data-l="職稱">'+h(e.title)+'</td>'+
+      '<td class="num" data-l="總分">'+fmt(totalScore(x.a))+'</td><td class="num" data-l="達成率">'+x.pc.toFixed(1)+'%</td>'+
+      '<td class="center" data-l="燈號"><span class="light '+lg.cls+'"></span></td>'+
+      '<td class="center" data-l="等第">'+h(gradeOfPct(x.pc))+'</td></tr>';
+  }).join('') || '<tr><td colspan="9" class="empty">本期間尚無評分資料</td></tr>';
+
+  return ''+
+  '<div class="page-title">'+h(p.name||'考核報表')+'</div>'+
+  '<div class="toolbar no-print">'+
+    '<label class="fld">考核期間<select onchange="RP.periodId=this.value;RP.empNos=[];route()">'+
+      DB.periods.map(function(x){ return '<option value="'+h(x.id)+'"'+(x.id===RP.periodId?' selected':'')+'>'+h(x.name)+'</option>'; }).join('')+
+    '</select></label>'+
+    '<label class="fld">組別<select onchange="RP.team=this.value;RP.empNos=[];route()">'+
+      '<option value="">全部</option>'+
+      TEAMS.map(function(d){ return '<option'+(d===RP.team?' selected':'')+'>'+h(d)+'</option>'; }).join('')+
+    '</select></label>'+
+    '<span class="spacer"></span>'+
+    '<button class="btn sec" onclick="selectAllEmp(true)">全選</button>'+
+    '<button class="btn sec" onclick="selectAllEmp(false)">全不選</button>'+
+    '<button class="btn sec" onclick="exportCsv()">匯出 CSV</button>'+
+    '<button class="btn" onclick="window.print()">列印</button>'+
+  '</div>'+
+
+  '<div class="panel no-print"><h3>受評人員（可複選比較）　<span class="hint">'+h(t.name)+'</span></h3>'+
+    '<div class="panel-body">'+chooser+'</div></div>'+
+
+  '<div class="panel"><div class="panel-body">'+
+    '<table class="data"><thead><tr>'+
+      '<th>員工編號</th><th>姓名</th><th>評選指標</th><th>考評項目</th>'+
+      raters.map(function(r){ return '<th class="num">'+RATER_NAME[r]+'</th>'; }).join('')+
+      '<th class="num">'+(isSum?'得分':'綜合')+'</th>'+
+      (t.levels && t.levels.length ? '<th class="center">等級</th>' : '')+
+      '<th class="center">紅綠燈</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>能力雷達圖</h3><div class="panel-body" style="text-align:center">'+
+    radarSvg(picked, t)+
+  '</div></div>'+
+
+  '<div class="panel"><h3>本期排名（'+ranked.length+' 人）</h3><div class="panel-body">'+
+    '<table class="data stack"><thead><tr><th class="center">名次</th><th>員工編號</th><th>姓名</th><th>組別</th><th>職稱</th>'+
+    '<th class="num">總分</th><th class="num">達成率</th><th class="center">燈號</th><th class="center">等第</th></tr></thead>'+
+    '<tbody>'+rankRows+'</tbody></table>'+
+  '</div></div>';
+}
+
+function toggleEmp(cb){
+  if(cb.checked){ if(RP.empNos.indexOf(cb.value)<0) RP.empNos.push(cb.value); }
+  else RP.empNos = RP.empNos.filter(function(v){ return v !== cb.value; });
+  route();
+}
+function selectAllEmp(on){
+  if(!on){ RP.empNos = []; route(); return; }
+  RP.empNos = DB.appraisals.filter(function(a){
+    const e = emp(a.empNo);
+    return e && a.periodId===RP.periodId && (!RP.team || e.team===RP.team);
+  }).map(function(a){ return a.empNo; });
+  route();
+}
+
+/* ---- 雷達圖（純 SVG）---- */
+const SERIES_COLOR = ['#3f7fbf','#e08a3f','#3fb24a','#a04ac2','#d94f6a','#2fa6a6'];
+
+function radarSvg(list, t){
+  if(!list.length) return '<div class="empty">尚未選取人員</div>';
+  const items = tplItems(t);
+  const n = items.length;
+  if(n < 3) return '<div class="empty">指標需 3 項以上才能繪製雷達圖</div>';
+  const show = list.slice(0,6);
+
+  const W = 620, H = 500, cx = W/2, cy = H/2 - 6, R = 160;
+  const MAX = Math.max.apply(null, items.map(function(i){ return Number(i.max)||10; }));
+  const ang = function(i){ return -Math.PI/2 + i*2*Math.PI/n; };
+  const pt  = function(i, r){ return [cx + r*Math.cos(ang(i)), cy + r*Math.sin(ang(i))]; };
+
+  let g = '';
+  for(let k=1;k<=4;k++){
+    const r = R*k/4;
+    const poly = items.map(function(_,i){ const q = pt(i,r); return q[0].toFixed(1)+','+q[1].toFixed(1); }).join(' ');
+    g += '<polygon points="'+poly+'" fill="none" stroke="#d6dde7" stroke-width="1"/>';
+    g += '<text x="'+(cx-6)+'" y="'+(pt(0,r)[1]+4)+'" text-anchor="end" font-size="11" fill="#8b95a5">'+(MAX*k/4)+'</text>';
+  }
+  g += '<text x="'+(cx-6)+'" y="'+(cy+4)+'" text-anchor="end" font-size="11" fill="#8b95a5">0</text>';
+  items.forEach(function(item,i){
+    const q = pt(i,R);
+    g += '<line x1="'+cx+'" y1="'+cy+'" x2="'+q[0].toFixed(1)+'" y2="'+q[1].toFixed(1)+'" stroke="#d6dde7"/>';
+    const lq = pt(i, R+26), a = ang(i);
+    const anchor = Math.abs(Math.cos(a)) < 0.25 ? 'middle' : (Math.cos(a) > 0 ? 'start' : 'end');
+    g += '<text x="'+lq[0].toFixed(1)+'" y="'+(lq[1]+4).toFixed(1)+'" text-anchor="'+anchor+'" font-size="12" fill="#3b4658">'+h(item.name)+'</text>';
+  });
+  show.forEach(function(ap,si){
+    const color = SERIES_COLOR[si % SERIES_COLOR.length];
+    const pts = items.map(function(item,i){
+      const f = itemFinal(t, ap.scores[item.id]);
+      const r = R * (f===null?0:Math.min(f,MAX))/MAX;
+      const q = pt(i,r);
+      return q[0].toFixed(1)+','+q[1].toFixed(1);
+    });
+    g += '<polygon points="'+pts.join(' ')+'" fill="'+color+'" fill-opacity="0.13" stroke="'+color+'" stroke-width="2"/>';
+    pts.forEach(function(p){
+      const c = p.split(',');
+      g += '<circle cx="'+c[0]+'" cy="'+c[1]+'" r="3.5" fill="#fff" stroke="'+color+'" stroke-width="2"/>';
+    });
+  });
+  let lgd = '';
+  show.forEach(function(ap,si){
+    const color = SERIES_COLOR[si % SERIES_COLOR.length];
+    const y = 24 + si*22;
+    lgd += '<circle cx="12" cy="'+y+'" r="6" fill="none" stroke="'+color+'" stroke-width="2"/>'+
+           '<text x="26" y="'+(y+4)+'" font-size="12" fill="#3b4658">'+h(empName(ap.empNo))+'（'+fmt(totalScore(ap))+'）</text>';
+  });
+
+  return '<div style="display:inline-flex;align-items:flex-start;gap:8px;flex-wrap:wrap">'+
+    '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:'+W+'px">'+g+'</svg>'+
+    '<svg width="200" height="'+(30+show.length*22)+'" style="border:1px solid #dbe2ea;border-radius:4px">'+lgd+'</svg>'+
+  '</div>'+ (list.length>6 ? '<div class="hint">雷達圖最多同時顯示 6 人</div>' : '');
+}
+
+/* ---- CSV ---- */
+function exportCsv(){
+  const p = period(RP.periodId) || {};
+  const t = tpl(p.templateId);
+  const raters = t.raters || ['manager'];
+  const list = DB.appraisals.filter(function(a){
+    const e = emp(a.empNo);
+    return e && a.periodId===RP.periodId && (!RP.team || e.team===RP.team);
+  });
+  const head = ['考核期間','考核表','員工編號','姓名','組別','職稱','評選指標','考評項目']
+    .concat(raters.map(function(r){ return RATER_NAME[r]; }))
+    .concat(['得分','配分','等級','燈號']);
+  const lines = [head.join(',')];
+  list.forEach(function(a){
+    const e = emp(a.empNo)||{};
+    tplItems(t).forEach(function(item){
+      const sc = a.scores[item.id]||{}; const f = itemFinal(t, sc);
+      lines.push([p.name,t.name,a.empNo,e.name,e.team,e.title,item.group,item.name]
+        .concat(raters.map(function(r){ return fmt(sc[r]); }))
+        .concat([fmt(f), item.max, levelOf(t,f), lightOfScore(f,item.max).text]).map(csvCell).join(','));
+    });
+    const total = totalScore(a), pc = pctOf(a);
+    lines.push([p.name,t.name,a.empNo,e.name,e.team,e.title,'【評定總分】',gradeOfPct(pc)]
+      .concat(raters.map(function(r){ return fmt(raterTotal(a,r)); }))
+      .concat([fmt(total), maxTotalOf(t), (pc===null?'':pc.toFixed(1)+'%'), lightOfPct(pc).text]).map(csvCell).join(','));
+  });
+  downloadText('績效考核_'+(p.id||'')+'.csv', '﻿'+lines.join('\r\n'), 'text/csv');
+}
+function csvCell(v){
+  v = (v===null||v===undefined)?'':String(v);
+  return /[",\r\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+function downloadText(name, text, mime){
+  const blob = new Blob([text], { type:(mime||'text/plain')+';charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+/* ============================================================
+   員工資料
+   ============================================================ */
+let EMP_FILTER = { team:'', kw:'' };
+
+function viewEmployee(){
+  const list = DB.employees.filter(function(e){
+    if(EMP_FILTER.team && e.team !== EMP_FILTER.team) return false;
+    if(EMP_FILTER.kw){
+      const k = EMP_FILTER.kw.toLowerCase();
+      if((e.empNo+' '+e.name+' '+(e.title||'')).toLowerCase().indexOf(k) < 0) return false;
+    }
+    return true;
+  });
+  const rows = list.map(function(e){
+    const idx = DB.employees.indexOf(e);
+    const nameCell = isAdmin()
+      ? '<a href="#" onclick="editEmp('+idx+');return false" title="點選姓名可編輯"><b>'+h(e.name)+'</b></a>'
+      : h(e.name);
+    return '<tr>'+
+      '<td data-l="工號">'+h(e.empNo)+'</td><td data-l="姓名">'+nameCell+'</td>'+
+      '<td data-l="組別">'+h(e.team||'')+'</td><td data-l="職稱">'+h(e.title)+'</td>'+
+      '<td data-l="到職日">'+h(rocDate(e.hireDate))+'</td><td data-l="到職累積日">'+h(seniority(e.hireDate))+'</td>'+
+      '<td class="center" data-l="狀態">'+(e.active?'在職':'離職')+'</td>'+
+    '</tr>';
+  }).join('') || '<tr><td colspan="7" class="empty">查無資料</td></tr>';
+
+  return ''+
+  '<div class="page-title">員工資料維護</div>'+
+  '<div class="panel"><div class="panel-body">'+
+    '<div class="toolbar">'+
+      '<label class="fld">組別<select onchange="EMP_FILTER.team=this.value;route()"><option value="">全部</option>'+
+        TEAMS.map(function(d){ return '<option'+(d===EMP_FILTER.team?' selected':'')+'>'+h(d)+'</option>'; }).join('')+'</select></label>'+
+      '<label class="fld">關鍵字<input value="'+h(EMP_FILTER.kw)+'" onchange="EMP_FILTER.kw=this.value.trim();route()" placeholder="工號 / 姓名 / 職稱"></label>'+
+      '<span class="spacer"></span>'+
+      (isAdmin()?'<span class="hint">點選姓名可編輯</span>　<button class="btn" onclick="editEmp(-1)">＋ 新增員工</button>'
+               :'<span class="hint">僅管理員可維護</span>')+
+    '</div>'+
+    '<table class="data stack"><thead><tr><th>工號</th><th>姓名</th><th>組別</th><th>職稱</th>'+
+    '<th>到職日(民國)</th><th>到職累積日</th><th class="center">狀態</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '<div class="hint" style="margin-top:8px">共 '+list.length+' 人</div>'+
+  '</div></div>'+
+  '<div class="panel" id="empEditor" style="display:none"><h3>員工資料</h3><div class="panel-body" id="empEditorBody"></div></div>';
+}
+
+function editEmp(idx){
+  const e = idx < 0
+    ? { empNo:'', name:'', dept:DEPARTMENTS[0], team:TEAMS[0], title:TITLES[0], hireDate:todayStr(), titleDate:todayStr(), manager:'', active:true }
+    : DB.employees[idx];
+  $('#empEditor').style.display = '';
+  $('#empEditorBody').innerHTML =
+    '<div class="row">'+
+      fld('工號','<input id="eNo" value="'+h(e.empNo)+'"'+(idx<0?'':' readonly')+'>')+
+      fld('姓名','<input id="eName" value="'+h(e.name)+'">')+
+      fld('組別','<select id="eTeam"><option value="">（無）</option>'+TEAMS.map(function(d){return '<option'+(d===e.team?' selected':'')+'>'+h(d)+'</option>';}).join('')+'</select>')+
+      fld('職稱','<select id="eTitle">'+TITLES.map(function(t){return '<option'+(t===e.title?' selected':'')+'>'+h(t)+'</option>';}).join('')+'</select>')+
+      fld('到職日期','<input type="date" id="eHire" value="'+h(e.hireDate)+'">')+
+      fld('任現職日期','<input type="date" id="eTitleDate" value="'+h(e.titleDate)+'">')+
+      fld('狀態','<select id="eActive"><option value="1"'+(e.active?' selected':'')+'>在職</option><option value="0"'+(e.active?'':' selected')+'>離職</option></select>')+
+    '</div>'+
+    '<div class="toolbar" style="margin-top:12px">'+
+      '<button class="btn" onclick="saveEmp('+idx+')">儲存</button>'+
+      '<button class="btn sec" onclick="document.getElementById(\'empEditor\').style.display=\'none\'">取消</button>'+
+      '<span class="spacer"></span>'+
+      (idx>=0?'<button class="btn danger" onclick="delEmp('+idx+')">刪除此員工</button>':'')+
+    '</div>';
+  $('#empEditor').scrollIntoView({ behavior:'smooth' });
+}
+function fld(label, inner){ return '<label class="fld">'+h(label)+inner+'</label>'; }
+
+function saveEmp(idx){
+  const no = $('#eNo').value.trim(), name = $('#eName').value.trim();
+  if(!no || !name){ toast('工號與姓名為必填'); return; }
+  if(idx < 0 && emp(no)){ toast('工號重複'); return; }
+  const o = idx < 0 ? {} : DB.employees[idx];
+  o.empNo = no; o.name = name;
+  o.dept = DEPARTMENTS[0]; o.team = $('#eTeam').value; o.title = $('#eTitle').value;
+  o.hireDate = $('#eHire').value; o.titleDate = $('#eTitleDate').value;
+  o.active = $('#eActive').value === '1';
+  if(idx < 0) DB.employees.push(o);
+  saveDB(); route(); toast('員工資料已儲存');
+}
+function delEmp(idx){
+  const e = DB.employees[idx];
+  if(DB.appraisals.some(function(a){ return a.empNo === e.empNo; })){ toast('該員工已有考核資料，請改設為離職'); return; }
+  if(!confirm('確定刪除員工 '+e.empNo+' '+e.name+' ？')) return;
+  DB.employees.splice(idx,1); saveDB(); route(); toast('已刪除員工');
+}
+
+/* ============================================================
+   考核期間
+   ============================================================ */
+function viewPeriod(){
+  const rows = DB.periods.map(function(p,i){
+    const cnt = DB.appraisals.filter(function(a){ return a.periodId===p.id; }).length;
+    const nameCell = isAdmin()
+      ? '<a href="#" onclick="editPeriod('+i+');return false" title="點選名稱可編輯"><b>'+h(p.name)+'</b></a>'
+      : h(p.name);
+    return '<tr><td data-l="代號">'+h(p.id)+'</td><td data-l="名稱">'+nameCell+'</td>'+
+      '<td data-l="考核表">'+h(tpl(p.templateId).name)+'</td>'+
+      '<td class="center" data-l="年份">'+h(p.year)+'</td><td class="center" data-l="類型">'+h(p.kind)+'</td>'+
+      '<td data-l="起訖">'+h(p.start)+' ~ '+h(p.end)+'</td>'+
+      '<td class="center" data-l="狀態">'+h(p.status)+'</td><td class="center" data-l="考核單數">'+cnt+'</td></tr>';
+  }).join('') || '<tr><td colspan="8" class="empty">尚無考核期間</td></tr>';
+
+  return ''+
+  '<div class="page-title">考核期間管理</div>'+
+  '<div class="panel"><div class="panel-body">'+
+    '<div class="toolbar">'+(isAdmin()
+      ?'<span class="hint">點選名稱可編輯</span>　<button class="btn" onclick="editPeriod(-1)">＋ 新增期間</button>'
+      :'<span class="hint">僅管理員可維護</span>')+'</div>'+
+    '<table class="data stack"><thead><tr><th>期間代號</th><th>名稱</th><th>考核表範本</th><th class="center">年份</th><th class="center">類型</th>'+
+    '<th>起訖</th><th class="center">狀態</th><th class="center">考核單數</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+  '</div></div>'+
+  '<div class="panel" id="pEditor" style="display:none"><h3>考核期間</h3><div class="panel-body" id="pEditorBody"></div></div>';
+}
+function editPeriod(idx){
+  const now = new Date();
+  const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0');
+  const p = idx < 0
+    ? { id:'MEP-'+y+'-'+m, templateId:'T-MEP', name:'機電部 '+y+' 年 '+Number(m)+' 月評效', year:y, kind:'月度',
+        start:y+'-'+m+'-01', end:y+'-'+m+'-'+new Date(y, Number(m), 0).getDate(), status:'進行中' }
+    : DB.periods[idx];
+  $('#pEditor').style.display = '';
+  $('#pEditorBody').innerHTML =
+    '<div class="row">'+
+      fld('期間代號','<input id="pId" value="'+h(p.id)+'"'+(idx<0?'':' readonly')+'>')+
+      fld('名稱','<input id="pName" value="'+h(p.name)+'" style="width:260px">')+
+      fld('考核表範本','<select id="pTpl">'+DB.templates.map(function(t){
+        return '<option value="'+h(t.id)+'"'+(t.id===p.templateId?' selected':'')+'>'+h(t.name)+'</option>'; }).join('')+'</select>')+
+      fld('年份','<input type="number" id="pYear" value="'+h(p.year)+'" style="width:90px">')+
+      fld('類型','<select id="pKind">'+PERIOD_KIND.map(function(k){return '<option'+(k===p.kind?' selected':'')+'>'+k+'</option>';}).join('')+'</select>')+
+      fld('開始','<input type="date" id="pStart" value="'+h(p.start)+'">')+
+      fld('結束','<input type="date" id="pEnd" value="'+h(p.end)+'">')+
+      fld('狀態','<select id="pStatus">'+['未開始','進行中','關閉'].map(function(s){return '<option'+(s===p.status?' selected':'')+'>'+s+'</option>';}).join('')+'</select>')+
+    '</div>'+
+    '<div class="toolbar" style="margin-top:12px">'+
+      '<button class="btn" onclick="savePeriod('+idx+')">儲存</button>'+
+      '<button class="btn sec" onclick="document.getElementById(\'pEditor\').style.display=\'none\'">取消</button>'+
+      '<span class="spacer"></span>'+
+      (idx>=0?'<button class="btn danger" onclick="delPeriod('+idx+')">刪除此期間</button>':'')+
+    '</div>'+
+    (idx>=0?'<div class="hint">已建立考核單的期間，變更範本不會改動既有考核單的評分項目。</div>':'');
+  $('#pEditor').scrollIntoView({ behavior:'smooth' });
+}
+function savePeriod(idx){
+  const id = $('#pId').value.trim();
+  if(!id){ toast('期間代號為必填'); return; }
+  if(idx < 0 && period(id)){ toast('期間代號重複'); return; }
+  const o = idx < 0 ? {} : DB.periods[idx];
+  o.id = id; o.name = $('#pName').value.trim(); o.templateId = $('#pTpl').value;
+  o.year = Number($('#pYear').value); o.kind = $('#pKind').value;
+  o.start = $('#pStart').value; o.end = $('#pEnd').value; o.status = $('#pStatus').value;
+  if(idx < 0) DB.periods.push(o);
+  saveDB(); route(); toast('考核期間已儲存');
+}
+function delPeriod(idx){
+  const p = DB.periods[idx];
+  if(DB.appraisals.some(function(a){ return a.periodId===p.id; })){ toast('該期間已有考核單，無法刪除'); return; }
+  if(!confirm('確定刪除考核期間 '+p.id+' ？')) return;
+  DB.periods.splice(idx,1); saveDB(); route(); toast('已刪除期間');
+}
+
+/* ============================================================
+   系統設定
+   ============================================================ */
+let SET_TPL = '';
+
+function viewSetting(){
+  const s = DB.setting;
+  if(!SET_TPL) SET_TPL = DB.templates[0].id;
+  const t = tpl(SET_TPL);
+
+  let itemRows = '';
+  (t.groups||[]).forEach(function(g, gi){
+    itemRows += '<tr class="grp"><td colspan="6"><b>'+h(g.name)+'</b>'+(g.std?'　<span class="hint">'+h(g.std)+'</span>':'')+'</td></tr>';
+    (g.items||[]).forEach(function(i, ii){
+      itemRows += '<tr>'+
+        '<td>'+h(i.id)+'</td>'+
+        '<td><input value="'+h(i.name)+'" oninput="setItem('+gi+','+ii+',\'name\',this.value)" style="width:130px"></td>'+
+        '<td class="num"><input type="number" min="0" value="'+h(i.max)+'" oninput="setItem('+gi+','+ii+',\'max\',Number(this.value))" style="width:70px;text-align:right"></td>'+
+        '<td class="num"><input type="number" min="0" value="'+h(i.weight)+'" oninput="setItem('+gi+','+ii+',\'weight\',Number(this.value))" style="width:70px;text-align:right"></td>'+
+        '<td><input value="'+h(i.desc||'')+'" oninput="setItem('+gi+','+ii+',\'desc\',this.value)" style="width:100%"></td>'+
+        '<td class="center">'+(isAdmin()?'<button class="btn sm danger" onclick="delItem('+gi+','+ii+')">刪除</button>':'')+'</td>'+
+      '</tr>';
+    });
+    itemRows += '<tr class="sub"><td colspan="6" class="no-print">'+
+      (isAdmin()?'<button class="btn sm sec" onclick="addItem('+gi+')">＋ 於「'+h(g.name)+'」新增項目</button>':'')+'</td></tr>';
+  });
+
+  return ''+
+  '<div class="page-title">系統設定</div>'+
+  (isAdmin()?'':'<div class="panel"><div class="empty">僅人資 / 管理員可修改設定，以下為唯讀檢視。</div></div>')+
+
+  '<div class="panel"><h3>考核表範本</h3><div class="panel-body">'+
+    '<div class="toolbar">'+
+      '<label class="fld">選擇範本<select onchange="SET_TPL=this.value;route()">'+
+        DB.templates.map(function(x){ return '<option value="'+h(x.id)+'"'+(x.id===SET_TPL?' selected':'')+'>'+h(x.name)+'</option>'; }).join('')+
+      '</select></label>'+
+      '<label class="fld">名稱<input id="tName" value="'+h(t.name)+'" style="width:260px"></label>'+
+      '<label class="fld">計分方式<select id="tMode">'+
+        '<option value="avg"'+(t.scoreMode==='avg'?' selected':'')+'>各項平均</option>'+
+        '<option value="sum"'+(t.scoreMode==='sum'?' selected':'')+'>各項加總</option></select></label>'+
+      '<label class="fld">評分者<span class="hint" style="padding-top:6px">主管評定（本系統目前僅此一種）</span></label>'+
+      '<span class="spacer"></span>'+
+      '<button class="btn" onclick="saveTemplate()">儲存範本</button>'+
+    '</div>'+
+    '<div class="hint">目前滿分：<b>'+maxTotalOf(t)+' 分</b>'+
+      (t.levels&&t.levels.length?'　級距：'+t.levels.map(function(L){return L.name+' '+L.min+'~'+L.max;}).join('｜'):'')+'</div>'+
+    '<table class="data" style="margin-top:10px"><thead><tr><th>代號</th><th>考評項目</th><th class="num">配分</th>'+
+    '<th class="num">權重</th><th>考評內容</th><th class="center">操作</th></tr></thead><tbody>'+itemRows+'</tbody></table>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>紅綠燈門檻（以達成百分比判定，同時適用 10 分制與 100 分制）</h3><div class="panel-body">'+
+    '<div class="row">'+
+      fld('綠燈 ≥ (%)','<input type="number" step="1" id="lg" value="'+s.light.green+'" style="width:90px">')+
+      fld('黃燈 ≥ (%)','<input type="number" step="1" id="ly" value="'+s.light.yellow+'" style="width:90px">')+
+    '</div>'+
+    '<div class="hint" style="margin-top:6px">'+
+      '<span class="light g"></span> 綠燈 ≥ '+s.light.green+'%　'+
+      '<span class="light y"></span> 黃燈 '+s.light.yellow+'% ~ '+s.light.green+'%　'+
+      '<span class="light r"></span> 紅燈 &lt; '+s.light.yellow+'%'+
+      '　（100 分制：'+s.light.green+' 分以上綠燈；10 分制：'+(s.light.green/10)+' 分以上綠燈）</div>'+
+  '</div></div>'+
+
+  '<div class="panel"><h3>附件限制</h3><div class="panel-body">'+
+    '<div class="row">'+
+      fld('單檔上限 (MB)','<input type="number" step="0.5" id="upMB" value="'+s.maxUploadMB+'" style="width:90px">')+
+      fld('允許副檔名（逗號分隔）','<input id="upExt" value="'+h(s.allowExt.join(','))+'" style="width:340px">')+
+    '</div>'+
+    '<div class="toolbar" style="margin-top:12px">'+
+      '<span class="spacer"></span><button class="btn" onclick="saveSetting()">儲存全域設定</button></div>'+
+  '</div></div>';
+}
+function setItem(gi, ii, key, val){ tpl(SET_TPL).groups[gi].items[ii][key] = val; }
+function addItem(gi){
+  const t = tpl(SET_TPL);
+  const used = tplItems(t).map(function(i){ return i.id; });
+  let n = used.length+1, id = 'X'+String(n).padStart(2,'0');
+  while(used.indexOf(id) >= 0){ n++; id = 'X'+String(n).padStart(2,'0'); }
+  t.groups[gi].items.push({ id:id, name:'新項目', weight:10, max:10, desc:'' });
+  DB.appraisals.forEach(function(a){
+    if(a.templateId === t.id) a.scores[id] = { self:null, team:null, manager:null, note:'' };
+  });
+  saveDB(); route();
+}
+function delItem(gi, ii){
+  const t = tpl(SET_TPL);
+  const item = t.groups[gi].items[ii];
+  if(!confirm('刪除項目「'+item.name+'」？使用此範本的考核單該項分數將一併移除。')) return;
+  t.groups[gi].items.splice(ii,1);
+  DB.appraisals.forEach(function(a){ if(a.templateId === t.id) delete a.scores[item.id]; });
+  saveDB(); route(); toast('已刪除項目');
+}
+function saveTemplate(){
+  const t = tpl(SET_TPL);
+  t.name = $('#tName').value.trim() || t.name;
+  t.scoreMode = $('#tMode').value;
+  t.raters = ['manager'];
+  if(t.scoreMode === 'avg'){
+    t.scoreMax = Math.max.apply(null, tplItems(t).map(function(i){ return Number(i.max)||10; }));
+  }
+  saveDB(); route(); toast('範本已儲存');
+}
+function saveSetting(){
+  const s = DB.setting;
+  s.light.green  = Number($('#lg').value);
+  s.light.yellow = Number($('#ly').value);
+  if(s.light.yellow > s.light.green){ toast('黃燈門檻不可高於綠燈'); return; }
+  s.maxUploadMB = Number($('#upMB').value) || 2;
+  s.allowExt = $('#upExt').value.split(',').map(function(x){ return x.trim().toLowerCase(); }).filter(Boolean);
+  saveDB(); route(); toast('設定已儲存');
+}
+
+/* ============================================================
+   備份 / 還原
+   ============================================================ */
+function exportAll(){
+  downloadText('績效考核備份_'+todayStr()+'.json', JSON.stringify(DB,null,2), 'application/json');
+}
+function importAll(file){
+  const r = new FileReader();
+  r.onload = function(){
+    try{
+      const obj = JSON.parse(r.result);
+      if(!obj.employees) throw new Error('格式不符');
+      if(!confirm('匯入將覆蓋目前所有資料，確定？')) return;
+      DB = obj; fixDB(); saveDB(); route(); toast('匯入完成');
+    }catch(err){ alert('匯入失敗：'+err.message); }
+  };
+  r.readAsText(file);
+}
+
+/* ============================================================
+   啟動
+   ============================================================ */
+(function init(){
+  loadDB();
+  const buildLabel = '（' + BUILD_NAME + '）版本編號:' + BUILD_NO;
+  $('#buildTag').textContent = buildLabel;
+  $('#ver').textContent = '員工績效考核系統 ' + APP_VER + '　' + buildLabel;
+  const rs = $('#roleSwitch'), us = $('#userSwitch');
+  function paintUsers(){
+    fixUser();
+    us.innerHTML = roleUsers(ROLE).map(function(no){
+      return '<option value="'+no+'"'+(no===USER?' selected':'')+'>'+empName(no)+'</option>';
+    }).join('');
+    $('#loginUser').textContent = empName(USER) + '（' + ROLE_NAME[ROLE] + '）';
+  }
+  rs.value = ROLE;
+  paintUsers();
+  rs.addEventListener('change', function(){
+    ROLE = rs.value; localStorage.setItem('perf_role', ROLE);
+    USER = ''; paintUsers(); localStorage.setItem('perf_user', USER);
+    route();
+  });
+  us.addEventListener('change', function(){
+    USER = us.value; localStorage.setItem('perf_user', USER);
+    $('#loginUser').textContent = empName(USER) + '（' + ROLE_NAME[ROLE] + '）';
+    route();
+  });
+  $('#btnExportAll').addEventListener('click', function(e){ e.preventDefault(); exportAll(); });
+  $('#btnImportAll').addEventListener('click', function(e){ e.preventDefault(); $('#fileImport').click(); });
+  $('#fileImport').addEventListener('change', function(){ if(this.files[0]) importAll(this.files[0]); this.value=''; });
+  $('#btnResetAll').addEventListener('click', function(e){
+    e.preventDefault();
+    if(confirm('將清除目前資料並回復示範資料，確定？')){ resetDB(); route(); toast('已重設'); }
+  });
+  window.addEventListener('hashchange', route);
+  route();
+})();
+
+</script>
+</body>
+</html>
