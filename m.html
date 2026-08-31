@@ -324,7 +324,12 @@
     .clock{display:none}
     .ctrl .sugg{display:none}
 
-    .place{padding:.3rem .6rem;gap:.4rem}
+    /* 直向：場地資訊列整條不顯示 —— 場地名已在頁首大標題、座標與測站
+       在上方控制列都有，這一列只是重複，卻吃掉一整段高度，把下面的
+       數據卡壓扁。橫向仍然保留。
+       註：縣市警特報標籤也在這一列，直向改由頂端警報橫幕與
+       「安全研判」分頁的〈氣象署特報〉呈現，資訊不會消失。 */
+    .place{display:none}
     .place .nm{font-size:1.3rem}
     .place .mt{font-size:.88rem;white-space:normal}
     .tag{font-size:.85rem;padding:.08rem .5rem}
@@ -362,11 +367,13 @@
     .ph em{min-width:0;flex:0 1 auto}
     .ph em{font-size:.82rem}
 
-    .card{padding:.35rem .5rem}
-    .card .k{font-size:1rem}
-    .card .v{font-size:2.8rem}
-    .card .v small{font-size:1.15rem}
-    .card .n{font-size:.88rem;white-space:normal}
+    /* 直向卡片字級：場地資訊列移除後每張卡多出不少高度，
+       字放大到接近欄寬上限，數值仍以 nowrap 保護不換行。 */
+    .card{padding:.45rem .6rem}
+    .card .k{font-size:1.3rem}
+    .card .v{font-size:3.6rem}
+    .card .v small{font-size:1.45rem}
+    .card .n{font-size:1.08rem;white-space:normal}
 
     /* 研判卡單欄堆疊，字級回到正常大小 */
     .alerts{grid-auto-rows:minmax(0,1fr)}
@@ -560,6 +567,12 @@
 
   /* 進場順序改由 JS 依元素實際 Y 座標寫成行內 animation-delay，
      這裡不再用 nth-child ——  卡片分欄排列，nth-child 排不出視覺上的上下順序。 */
+  @keyframes badBlink{0%,100%{opacity:1}50%{opacity:.32}}
+  .al.lv-bad .m,.card.c-bad .v{animation:badBlink 1.1s ease-in-out infinite}
+  .al.lv-bad{border-color:var(--bad)}
+  @media (prefers-reduced-motion:reduce){
+    .al.lv-bad .m,.card.c-bad .v{animation:badBlink 2.6s ease-in-out infinite}
+  }
 </style>
 </head>
 <body>
@@ -777,7 +790,7 @@ const EMBEDDED_KEY="CWA-04063E2C-B6E0-410A-A694-7078E47B617E";
 /* === APP VERSION（bump.py 自動跳號，勿更動此行格式） === */
 const VER="2.9";
 const VER_NAME="小夜景";
-const MOB_VER="1.29";
+const MOB_VER="1.33";
 $("ver").textContent="("+VER_NAME+")手機版 "+MOB_VER+"　基於桌機 "+VER;
 
 const AUTO_ITV=600;      // 自動更新間隔（秒），固定 10 分鐘
