@@ -663,7 +663,7 @@
 
     <div class="panel g-cr">
       <div class="ph">逐時趨勢<em>過去 12 ＋ 未來 12 小時・點面板看明細</em></div>
-      <div class="duoh">逐時雨量 mm（半透明為預報）</div>
+      <div class="duoh">逐時雨量 mm（模式推估，半透明為預報）</div>
       <div class="chartwrap"><div class="chart" id="chartRain"></div><div class="xax" id="axRain"></div></div>
     </div>
 
@@ -777,7 +777,7 @@ const EMBEDDED_KEY="CWA-04063E2C-B6E0-410A-A694-7078E47B617E";
 /* === APP VERSION（bump.py 自動跳號，勿更動此行格式） === */
 const VER="2.9";
 const VER_NAME="小夜景";
-const MOB_VER="1.27";
+const MOB_VER="1.29";
 $("ver").textContent="("+VER_NAME+")手機版 "+MOB_VER+"　基於桌機 "+VER;
 
 const AUTO_ITV=600;      // 自動更新間隔（秒），固定 10 分鐘
@@ -968,7 +968,7 @@ async function getQuake(lat,lon,key){
   if(key){
     try{
       const r=await fetch("https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization="+
-                          encodeURIComponent(key)+"&format=JSON&limit=6");
+                          encodeURIComponent(key)+"&format=JSON&limit=20");
       const j=await r.json();
       const eqs=(j.records&&j.records.Earthquake)||[];
       if(eqs.length){
@@ -1137,7 +1137,7 @@ function loadMiniRadar(){
   const im=$("rdmini");
   im.referrerPolicy="no-referrer";
   im.src=RADARS[0].u+"?t="+Date.now();
-  $("rdtime").textContent="氣象署合成回波　"+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+"　點圖可放大";
+  $("rdtime").textContent="氣象署合成回波　取得 "+new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"})+"　點圖可放大";
 }
 
 const RADARS=[
@@ -1414,10 +1414,11 @@ function buildHeatTable(tc,rh){
         if(d<bd){ bd=d; ri=i; ci=j; }
       }
     }
-    if(ri<0){   // 溫濕度超出表格範圍時，退回最接近的格
-      bd=1e9; HI_TF.forEach(function(ff,i){ const d=Math.abs((ff-32)*5/9-tc); if(d<bd){bd=d;ri=i;} });
-      bd=1e9; HI_RH.forEach(function(rr,i){ const d=Math.abs(rr-rh); if(d<bd){bd=d;ci=i;} });
-    }
+    /* 找不到相鄰格，或最接近的格與實際熱指數差太多，就「不亮格」。
+       官方表最低一列是 80 °F＝26.7 °C；氣溫低於這條線時走的是低溫簡化式，
+       表內任何一格都對不上（例：25.5 °C／95 % 卡片 26.7，表格最低格卻是 30.0），
+       硬亮一格只會讓表與卡片互相矛盾，還可能亮到錯的等級。 */
+    if(bd>1.0){ ri=-1; ci=-1; }
   }
   let h='<tr><th class="cnr">℃＼%</th>';
   HI_RH.forEach(function(rr){ h+='<th>'+rr+'</th>'; });
@@ -1432,7 +1433,8 @@ function buildHeatTable(tc,rh){
   }
   $("hitab").innerHTML=h;
   $("hinow").textContent = (tc===null||rh===null) ? "無溫濕度資料"
-    : ("溫度 "+tc.toFixed(1)+" °C・濕度 "+Math.round(rh)+" %・"+HI_LVNAME[hiLevel(cur)]);
+    : ("溫度 "+tc.toFixed(1)+" °C・濕度 "+Math.round(rh)+" %・"+HI_LVNAME[hiLevel(cur)]
+       +(ri<0?"（超出官方表範圍：表格自 26.7 °C／40 % 起，未標示對應格）":""));
   hiCompact();
 }
 /* 格子放不下數字時只留顏色。用實際溢出量判斷，不用寫死的像素門檻，
@@ -1621,8 +1623,8 @@ function render(lat,lon,om,place,cwa,quake,ty){
   showStations(cwa);
   loadMiniRadar();
 
-  let iNow=0,bd=1e18;
-  H.time.forEach(function(t,i){ const d=Math.abs(new Date(t)-now); if(d<bd){bd=d;iNow=i;} });
+  let iNow=0;
+  H.time.forEach(function(t,i){ if(new Date(t)<=now) iNow=i; });   // 包住「現在」的那一格
 
   function sum(arr,a,b){ let s=0,ok=false;
     for(let i=Math.max(0,a);i<=Math.min(arr.length-1,b);i++){
@@ -1677,7 +1679,7 @@ function render(lat,lon,om,place,cwa,quake,ty){
                                  :"Open-Meteo 模式推估";
   $("wind").innerHTML=
     card("平均風速",f(w_avg,1),"m/s",bft(w_avg),wl(w_avg))+
-    card("24 小時最大陣風",f(g24,1),"m/s","過去實況",wl(g24))+
+    card("24 小時最大陣風",f(g24,1),"m/s","過去 24 小時・模式推估",wl(g24))+
     card("最大陣風",f(w_gust,1),"m/s",bft(w_gust),wl(w_gust))+
     card("未來 12 小時陣風",f(gfc,1),"m/s",gfcT?("估 "+hhmm(gfcT)):"預報",wl(gfc));
 
@@ -1686,7 +1688,11 @@ function render(lat,lon,om,place,cwa,quake,ty){
   let dew=null;
   if(t!==null&&rh!==null&&rh>0){ const a=17.27,b=237.7,g=(a*t)/(b+t)+Math.log(rh/100); dew=(b*g)/(a-g); }
   const spread=(t!==null&&dew!==null)?(t-dew):null;
-  const app=N(c.apparent_temperature);
+  let app=N(c.apparent_temperature);
+  if(t!==null&&rh!==null){                    // 與同卡的氣溫／濕度同源，避免互相矛盾
+    const _e=(rh/100)*6.105*Math.exp(17.27*t/(237.7+t));   // 水氣壓 hPa
+    app=t+0.33*_e-0.70*(w_avg!==null?w_avg:0)-4.00;
+  }
 
   // 自然濕球溫度（Stull 近似）→ 遮蔭處 WBGT ≒ 0.7Tw + 0.3Ta
   let wbgt=null;
